@@ -9,10 +9,7 @@
 @tool
 extends EditorNode3DGizmo
 
-const GIZMO_PLUGIN := preload("./gizmo_plugin.gd")
-const MIN_AREA_SIZE := 0.002
-const HANDLE_NAMES: Array[String] = ["X", "Y", "Z"]
-const HANDLE_DIRECTIONS: Array[Vector3] = [
+const _HANDLE_DIRECTIONS: Array[Vector3] = [
 	Vector3.UP,
 	Vector3.DOWN,
 	Vector3.LEFT,
@@ -20,19 +17,23 @@ const HANDLE_DIRECTIONS: Array[Vector3] = [
 	Vector3.FORWARD,
 	Vector3.BACK,
 ]
+const _SETTINGS := preload("../plugin_settings.gd")
 
 var handles_3d_size: float = 0.0
 var _original_area_global_transform: Variant = null
 var _original_area_size: Variant = null
+var _plugin: EditorPlugin
 
 
-func _init() -> void:
+func _init(plugin: EditorPlugin) -> void:
+	_plugin = plugin
 	var version := Engine.get_version_info()
 	if version["major"] == 4 and version["minor"] == 0:
 		handles_3d_size = 0.1
 
 
 func _get_handle_name(handle_id: int, secondary: bool) -> String:
+	const HANDLE_NAMES: Array[String] = ["X", "Y", "Z"]
 	return "Axis Size %s" % HANDLE_NAMES[_get_handle_axis_index(handle_id)]
 
 
@@ -46,11 +47,13 @@ func _get_handle_value(handle_id: int, secondary: bool) -> Variant:
 
 
 func _set_handle(handle_id: int, secondary: bool, camera: Camera3D, screen_pos: Vector2) -> void:
+	const MIN_AREA_SIZE := 0.002
+	
 	var area := get_node_3d() as RoommateBlocksArea
 	var original_area_global_transform := _original_area_global_transform as Transform3D
 	var original_area_size := _original_area_size as Vector3
 	
-	var handle_direction := HANDLE_DIRECTIONS[handle_id]
+	var handle_direction := _HANDLE_DIRECTIONS[handle_id]
 	var handle_axis_index := _get_handle_axis_index(handle_id)
 	var handle_position := area.global_transform * _get_handle_position(handle_id, area.box)
 	var handle_normal := (area.global_transform.basis * handle_direction).normalized()
@@ -74,14 +77,14 @@ func _set_handle(handle_id: int, secondary: bool, camera: Camera3D, screen_pos: 
 		area.global_position = original_area_global_transform.origin
 		var new_area_size := delta_to_center * 2
 		if Input.is_physical_key_pressed(KEY_CTRL):
-			new_area_size = snappedf(new_area_size, 1)
+			new_area_size = snappedf(new_area_size, _SETTINGS.get_float(&"stid_area_resize_snap"))
 		area.size[handle_axis_index] = maxf(new_area_size, MIN_AREA_SIZE)
 		return
 #
 #	# growing in one side
 	var new_area_size := delta_to_center + original_area_size[handle_axis_index] / 2
 	if Input.is_physical_key_pressed(KEY_CTRL):
-		new_area_size = snappedf(new_area_size, 1)
+		new_area_size = snappedf(new_area_size, _SETTINGS.get_float(&"stid_area_resize_snap"))
 	new_area_size = maxf(new_area_size, MIN_AREA_SIZE)
 	var grow_direction := area.global_transform.basis * handle_direction
 	var grow_start := original_area_global_transform.origin - grow_direction * original_area_size[handle_axis_index] / 2
@@ -89,14 +92,34 @@ func _set_handle(handle_id: int, secondary: bool, camera: Camera3D, screen_pos: 
 	area.size[handle_axis_index] = new_area_size
 
 
-func _commit_handle(handle_id: int, secondary: bool, restore, cancel: bool) -> void:
+func _commit_handle(handle_id: int, secondary: bool, restore: Variant, cancel: bool) -> void:
+	var original_transform := _original_area_global_transform as Transform3D
+	var original_size := _original_area_size as Vector3
 	_original_area_global_transform = null
 	_original_area_size = null
+	var area := get_node_3d() as RoommateBlocksArea
+	if cancel:
+		area.size = original_size
+		area.global_transform = original_transform
+		return
+	
+	if _SETTINGS.get_bool(&"stid_auto_snap_on_gizmo_edit"):
+		var root := area.find_root()
+		if root:
+			area.snap_to_range(root.global_transform, root.block_size)
+	
+	var undo_redo := _plugin.get_undo_redo()
+	undo_redo.create_action("ROOMMATE: Change Area Size")
+	undo_redo.add_undo_property(area, &"global_transform", original_transform)
+	undo_redo.add_do_property(area, &"global_transform", area.global_transform)
+	undo_redo.add_undo_property(area, &"size", original_size)
+	undo_redo.add_do_property(area, &"size", area.size)
+	undo_redo.commit_action()
 
 
 func _draw_area_edit() -> void:
 	var area := get_node_3d() as RoommateBlocksArea
-	var area_selected := EditorPlugin.new().get_editor_interface().get_selection().get_selected_nodes().has(area)
+	var area_selected := _plugin.get_editor_interface().get_selection().get_selected_nodes().has(area)
 	
 	if not area_selected:
 		return
@@ -108,7 +131,7 @@ func _draw_area_edit() -> void:
 	# handles
 	var direction_to_point := func (handle_id: int) -> Vector3: 
 		return _get_handle_position(handle_id, area.box)
-	var handles_positions := range(HANDLE_DIRECTIONS.size()).map(direction_to_point)
+	var handles_positions := range(_HANDLE_DIRECTIONS.size()).map(direction_to_point)
 	if handles_3d_size > 0:
 		var handle_3d_material := get_plugin().get_material("handles_3d", self)
 		for handle_position in handles_positions:
@@ -122,25 +145,28 @@ func _draw_area_edit() -> void:
 
 
 func _get_aabb_lines(aabb: AABB) -> PackedVector3Array:
+	const AABB_ENDPOINTS_COUNT := 8
+	const ENDPOINTS_MATRIX_ORDER := 2
+	const TOP_ENDPOINTS := [[2, 1], [0, 3]]
+	const BOTTOM_ENDPOINTS := [[6, 5], [4, 7]]
+	
 	var result := PackedVector3Array()
-	const TOP := [[2, 1], [0, 3]]
-	const BOTTOM := [[6, 5], [4, 7]]
-	for i in 2:
-		for j in 2:
+	for i in ENDPOINTS_MATRIX_ORDER:
+		for j in ENDPOINTS_MATRIX_ORDER:
 			# corner 1
-			result.push_back(aabb.get_endpoint(TOP[0][i]))
-			result.push_back(aabb.get_endpoint(TOP[1][j]))
+			result.push_back(aabb.get_endpoint(TOP_ENDPOINTS[0][i]))
+			result.push_back(aabb.get_endpoint(TOP_ENDPOINTS[1][j]))
 			# corner 2
-			result.push_back(aabb.get_endpoint(BOTTOM[0][i]))
-			result.push_back(aabb.get_endpoint(BOTTOM[1][j]))
+			result.push_back(aabb.get_endpoint(BOTTOM_ENDPOINTS[0][i]))
+			result.push_back(aabb.get_endpoint(BOTTOM_ENDPOINTS[1][j]))
 			# vertical line
-			result.push_back(aabb.get_endpoint(TOP[i][j]))
-			result.push_back(aabb.get_endpoint(BOTTOM[i][j]))
+			result.push_back(aabb.get_endpoint(TOP_ENDPOINTS[i][j]))
+			result.push_back(aabb.get_endpoint(BOTTOM_ENDPOINTS[i][j]))
 	return result
 
 
 func _get_handle_axis_index(handle_id: int) -> int:
-	var direction := HANDLE_DIRECTIONS[handle_id]
+	var direction := _HANDLE_DIRECTIONS[handle_id]
 	if direction.x != 0:
 		return Vector3.AXIS_X
 	if direction.y != 0:
@@ -151,4 +177,4 @@ func _get_handle_axis_index(handle_id: int) -> int:
 
 
 func _get_handle_position(handle_id: int, box: AABB) -> Vector3:
-	return box.get_center() + box.size * HANDLE_DIRECTIONS[handle_id] * 0.5
+	return box.get_center() + box.size * _HANDLE_DIRECTIONS[handle_id] / 2

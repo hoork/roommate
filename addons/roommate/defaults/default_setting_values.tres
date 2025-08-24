@@ -1,0 +1,44 @@
+[gd_resource type="Resource" load_steps=5 format=3 uid="uid://r6yvyposmop4"]
+
+[ext_resource type="Script" path="res://addons/roommate/resources/default_setting_values.gd" id="1_s157l"]
+
+[sub_resource type="InputEventKey" id="InputEventKey_425sl"]
+device = -1
+alt_pressed = true
+keycode = 69
+unicode = 101
+
+[sub_resource type="InputEventKey" id="InputEventKey_b6dc5"]
+device = -1
+alt_pressed = true
+keycode = 81
+unicode = 113
+
+[sub_resource type="InputEventKey" id="InputEventKey_7glht"]
+device = -1
+alt_pressed = true
+keycode = 87
+unicode = 119
+
+[resource]
+script = ExtResource("1_s157l")
+settings = {
+"stid_area_block_range_step": 0.5,
+"stid_area_resize_snap": 1.0,
+"stid_area_snap_margin": 0.0,
+"stid_auto_snap_on_gizmo_edit": false,
+"stid_bake_nav_on_thread": true,
+"stid_clear_settings_when_plugin_disabled": false,
+"stid_collision_shape_resource_file_postfix": "_collision.tres",
+"stid_mesh_container_name": &"RoommateMeshContainer",
+"stid_mesh_resource_file_postfix": "_mesh.tres",
+"stid_nav_mesh_resource_file_postfix": "_nav.tres",
+"stid_scenes_fallback_parent_name": &"RoommateSceneFallbackContainer",
+"stid_scenes_group": &"roommate_generated_scenes",
+"stid_set_global_rotation_when_snapping": false
+}
+shortcuts = {
+"stid_clear_scenes_shortcut": SubResource("InputEventKey_425sl"),
+"stid_generate_root_nodes_shortcut": SubResource("InputEventKey_b6dc5"),
+"stid_snap_roots_areas_shortcut": SubResource("InputEventKey_7glht")
+}

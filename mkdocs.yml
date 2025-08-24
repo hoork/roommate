@@ -1,0 +1,26 @@
+site_name: Roommate
+site_url: https://hoork.github.io/roommate
+repo_url: https://github.com/hoork/roommate
+repo_name: hoork/roommate
+nav:
+  - Roommate: index.md
+  - Getting Started:
+    - Installation: getting_started/installation.md
+    - Core Concepts: getting_started/core_concepts.md
+theme:
+  name: material
+  palette:
+    primary: white
+  logo: assets/roommate_logo.png
+  favicon: assets/roommate_logo.png
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - search.suggest
+plugins:
+  - search
+  - glightbox
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - pymdownx.blocks.caption

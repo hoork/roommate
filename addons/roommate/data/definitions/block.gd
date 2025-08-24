@@ -17,17 +17,18 @@ const OUT_OF_BOUNDS_TYPE := &"btid_out_of_bounds"
 
 var type_id: StringName
 var position: Vector3i
+var rotation: Vector3
 var slots := {}
 var center: Vector3:
 	get: return (position as Vector3) + Vector3.ONE / 2
 
 
-static func raycast(start: Vector3i, position_change: Vector3i, source_blocks: Dictionary) -> int:
+static func raycast(start: Vector3i, step: Vector3i, source_blocks: Dictionary) -> int:
 	var result := 0
-	var block := source_blocks.get(start + position_change) as RoommateBlock
+	var block := source_blocks.get(start + step) as RoommateBlock
 	while block:
 		result += 1
-		block = source_blocks.get(block.position + position_change) as RoommateBlock
+		block = source_blocks.get(block.position + step) as RoommateBlock
 	return result
 
 
