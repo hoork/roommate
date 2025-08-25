@@ -58,8 +58,6 @@ func generate_roots(roots: Array[RoommateRoot]) -> void:
 		
 		# generating everything...
 		root.generate()
-		if nav_region:
-			await nav_region.bake_finished
 		
 		# post-generate mesh
 		var new_mesh_container := root.get_node_or_null(root.linked_mesh_container) as Node3D
