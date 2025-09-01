@@ -79,6 +79,7 @@ func create_blocks(root_transform: Transform3D, block_size: float) -> Dictionary
 				if processed_block.slots.has(slot_id):
 					continue
 				processed_block.slots[slot_id] = RoommatePart.new()
+			processed_block.make_read_only()
 		result[block_position] = processed_block
 	return result
 
@@ -147,19 +148,21 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 
 
 func _create_default_part(anchor: Vector3, flow: Vector3, part_transform: Transform3D, 
-		set_mesh := true, set_nav := false) -> RoommatePart:
+		set_mesh := true, set_nav := false, set_occluder := false) -> RoommatePart:
 	var result := RoommatePart.new()
 	result.anchor = anchor
 	result.flow = flow
 	result.mesh_transform = part_transform
 	result.collision_transform = part_transform
 	result.nav_transform = part_transform
+	result.occluder_transform = part_transform
 	result.scene_transform = part_transform
 	var default_mesh := QuadMesh.new()
 	default_mesh.material = RoommateStyler.DEFAULT_MATERIAL
 	result.mesh = default_mesh if set_mesh else null
 	result.collision_mesh = default_mesh if set_mesh else null
 	result.nav_mesh = default_mesh if set_nav else null
+	result.occluder_mesh = default_mesh if set_occluder else null
 	return result
 
 
@@ -172,11 +175,11 @@ func _create_space_parts() -> Dictionary:
 		RoommateBlock.Slot.FLOOR: _create_default_part(Vector3(0.5, 0, 0.5), Vector3i.DOWN, 
 				Transform3D.IDENTITY.rotated(Vector3.LEFT, PI / 2), true, true),
 		RoommateBlock.Slot.WALL_LEFT: _create_default_part(Vector3(0, 0.5, 0.5), Vector3i.LEFT, 
-				Transform3D.IDENTITY.rotated(Vector3.UP, PI / 2)),
+				Transform3D.IDENTITY.rotated(Vector3.UP, PI / 2), true, false, true),
 		RoommateBlock.Slot.WALL_RIGHT: _create_default_part(Vector3(1, 0.5, 0.5), Vector3i.RIGHT, 
-				Transform3D.IDENTITY.rotated(Vector3.DOWN, PI / 2)),
+				Transform3D.IDENTITY.rotated(Vector3.DOWN, PI / 2), true, false, true),
 		RoommateBlock.Slot.WALL_FORWARD: _create_default_part(Vector3(0.5, 0.5, 0), Vector3i.FORWARD, 
-				Transform3D.IDENTITY),
+				Transform3D.IDENTITY, true, false, true),
 		RoommateBlock.Slot.WALL_BACK: _create_default_part(Vector3(0.5, 0.5, 1), Vector3i.BACK, 
-				Transform3D.IDENTITY.rotated(Vector3.UP, PI)),
+				Transform3D.IDENTITY.rotated(Vector3.UP, PI), true, false, true),
 	}

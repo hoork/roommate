@@ -27,12 +27,12 @@ settings = {
 "stid_area_resize_snap": 1.0,
 "stid_area_snap_margin": 0.0,
 "stid_auto_snap_on_gizmo_edit": false,
-"stid_bake_nav_on_thread": true,
 "stid_clear_settings_when_plugin_disabled": false,
 "stid_collision_shape_resource_file_postfix": "_collision.tres",
 "stid_mesh_container_name": &"RoommateMeshContainer",
 "stid_mesh_resource_file_postfix": "_mesh.tres",
 "stid_nav_mesh_resource_file_postfix": "_nav.tres",
+"stid_occluder_resource_file_postfix": &"_occluder.occ",
 "stid_scenes_fallback_parent_name": &"RoommateSceneFallbackContainer",
 "stid_scenes_group": &"roommate_generated_scenes",
 "stid_set_global_rotation_when_snapping": false

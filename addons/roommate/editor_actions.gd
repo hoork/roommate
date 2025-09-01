@@ -47,14 +47,19 @@ func generate_roots(roots: Array[RoommateRoot]) -> void:
 		_ur.add_undo_property(root, &"linked_mesh_container", root.linked_mesh_container)
 		
 		# pre-generate collision
-		var collision_shape := root.get_node_or_null(root.linked_collision_shape) as CollisionShape3D
-		if collision_shape:
-			_ur.add_undo_property(collision_shape, &"shape", collision_shape.shape)
+		var collision_shape_container := root.get_node_or_null(root.linked_collision_shape_container) as CollisionShape3D
+		if collision_shape_container:
+			_ur.add_undo_property(collision_shape_container, &"shape", collision_shape_container.shape)
 		
 		# pre-generate nav
-		var nav_region := root.get_node_or_null(root.linked_navigation_region) as NavigationRegion3D
-		if nav_region:
-			_ur.add_undo_property(nav_region, &"navigation_mesh", nav_region.navigation_mesh)
+		var nav_mesh_container := root.get_node_or_null(root.linked_nav_mesh_container) as NavigationRegion3D
+		if nav_mesh_container:
+			_ur.add_undo_property(nav_mesh_container, &"navigation_mesh", nav_mesh_container.navigation_mesh)
+		
+		# pre-generate occlusion
+		var occluder_container := root.get_node_or_null(root.linked_occluder_container) as OccluderInstance3D
+		if occluder_container:
+			_ur.add_undo_property(occluder_container, &"occluder", occluder_container.occluder)
 		
 		# generating everything...
 		root.generate()
@@ -76,12 +81,16 @@ func generate_roots(roots: Array[RoommateRoot]) -> void:
 		_ur.add_do_property(root, &"linked_mesh_container", root.linked_mesh_container)
 		
 		# post-generate collision
-		if collision_shape:
-			_ur.add_do_property(collision_shape, &"shape", collision_shape.shape)
+		if collision_shape_container:
+			_ur.add_do_property(collision_shape_container, &"shape", collision_shape_container.shape)
 		
 		# post-generate nav
-		if nav_region:
-			_ur.add_do_property(nav_region, &"navigation_mesh", nav_region.navigation_mesh)
+		if nav_mesh_container:
+			_ur.add_do_property(nav_mesh_container, &"navigation_mesh", nav_mesh_container.navigation_mesh)
+		
+		# post-generate occlusion
+		if occluder_container:
+			_ur.add_do_property(occluder_container, &"occluder", occluder_container.occluder)
 		
 		# post-generate scenes
 		for scene in root.get_owned_scenes():

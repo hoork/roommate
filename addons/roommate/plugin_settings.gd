@@ -14,10 +14,6 @@ const _DEFAULTS := preload("./defaults/default_setting_values.tres")
 var _editor_settings: EditorSettings
 
 
-func _init(plugin: EditorPlugin) -> void:
-	_editor_settings = plugin.get_editor_interface().get_editor_settings()
-
-
 static func get_bool(setting_id: StringName) -> bool:
 	return get_or_default(setting_id) as bool
 
@@ -49,6 +45,10 @@ static func _get_path(settind_id: StringName) -> String:
 	if not settind_id.begins_with("stid_"):
 		push_error("ROOMMATE: Setting Id must start with stid_ prefix. Received '%s'." % settind_id)
 	return SETTINGS_PATH_TEMPLATE % settind_id.trim_prefix("stid_")
+
+
+func _init(plugin: EditorPlugin) -> void:
+	_editor_settings = plugin.get_editor_interface().get_editor_settings()
 
 
 func init_settings() -> void:

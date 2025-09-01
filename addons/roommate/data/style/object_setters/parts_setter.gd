@@ -28,6 +28,8 @@ var scene_transform: _TRANSFORM3D_SETTER:
 	get: return resolve_value_setter(&"scene_transform", _TRANSFORM3D_SETTER)
 var nav_transform: _TRANSFORM3D_SETTER:
 	get: return resolve_value_setter(&"nav_transform", _TRANSFORM3D_SETTER)
+var occluder_transform: _TRANSFORM3D_SETTER:
+	get: return resolve_value_setter(&"occluder_transform", _TRANSFORM3D_SETTER)
 
 var mesh: _MESH_SETTER:
 	get: return resolve_value_setter(&"mesh", _MESH_SETTER)
@@ -37,11 +39,16 @@ var scene: _PACKED_SCENE_SETTER:
 	get: return resolve_value_setter(&"scene", _PACKED_SCENE_SETTER)
 var nav_mesh: _MESH_SETTER:
 	get: return resolve_value_setter(&"nav_mesh", _MESH_SETTER)
+var occluder_mesh: _MESH_SETTER:
+	get: return resolve_value_setter(&"occluder_mesh", _MESH_SETTER)
 
 var scene_parent_path: _NODE_PATH_SETTER:
 	get: return resolve_value_setter(&"scene_parent_path", _NODE_PATH_SETTER)
 var scene_property_overrides: _DICTIONARY_SETTER:
 	get: return resolve_value_setter(&"scene_property_overrides", _DICTIONARY_SETTER)
+
+var surfaces: _SURFACE_OVERRIDE_SETTER:
+	get: return override_fallback_surface()
 
 var surface_overrides := {}
 var fallback_surface_override: _SURFACE_OVERRIDE_SETTER = null

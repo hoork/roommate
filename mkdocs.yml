@@ -1,26 +1,69 @@
-site_name: Roommate
+site_name: Roommate Docs
 site_url: https://hoork.github.io/roommate
-repo_url: https://github.com/hoork/roommate
+site_author: Hoork
+site_description: Documentation for Roommate plugin
+
 repo_name: hoork/roommate
-nav:
-  - Roommate: index.md
-  - Getting Started:
-    - Installation: getting_started/installation.md
-    - Core Concepts: getting_started/core_concepts.md
+repo_url: https://github.com/hoork/roommate
+
+copyright: Copyright &copy; 2025 Kirill Rozhkov
+
 theme:
   name: material
-  palette:
-    primary: white
-  logo: assets/roommate_logo.png
-  favicon: assets/roommate_logo.png
-  icon:
-    repo: fontawesome/brands/github
   features:
     - search.suggest
+    - navigation.tabs
+    - content.code.copy
+  palette:
+    - scheme: slate
+      primary: black
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to light mode
+    - scheme: default
+      primary: white
+      toggle:
+        icon: material/lightbulb
+        name: Switch to dark mode
+  logo: assets/images/roommate_logo.png
+  favicon: assets/images/roommate_logo.png
+  icon:
+    repo: fontawesome/brands/github
+
 plugins:
   - search
   - glightbox
+
 markdown_extensions:
   - attr_list
   - md_in_html
   - pymdownx.blocks.caption
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.details
+  - pymdownx.superfences
+
+nav:
+  - Home:
+    - Welcome: index.md
+  - Getting Started:
+    - getting_started/installation.md
+    - getting_started/first_room.md
+    - getting_started/core_concepts.md
+  - Styles:
+    - styles/creating_styles.md
+    - styles/selecting_blocks.md
+    - styles/selecting_parts.md
+  - Classes:
+    - Nodes:
+      - classes/root.md
+    - Resources:
+      - classes/style.md
+      - classes/simple_style.md
+    - Data:
+      - classes/block.md

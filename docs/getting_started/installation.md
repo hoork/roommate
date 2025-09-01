@@ -2,6 +2,10 @@
 
 Installation process is no different than any of other godot plugins. There are several options how to do it.
 
+!!! warning
+
+    Restarting editor after installation is recommended.
+
 ## Installing via Asset Library
 
 1. Open your godot project
@@ -30,7 +34,8 @@ Installation process is no different than any of other godot plugins. There are 
 
 #### Asset Store
 
-1. *WIP*
+1. Go to [asset store page of Roommate plugin](https://store-beta.godotengine.org/asset/hoork/roommate)
+2. Press Download button
 
 ### Adding plugin
 
@@ -47,5 +52,3 @@ Installation process is no different than any of other godot plugins. There are 
 2. Click **Plugins** tab
 
 3. Click **Enable** checkbox at the Roommate plugin
-
-

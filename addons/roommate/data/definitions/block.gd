@@ -15,12 +15,38 @@ const SPACE_TYPE := &"btid_space"
 const OBLIQUE_TYPE := &"btid_oblique"
 const OUT_OF_BOUNDS_TYPE := &"btid_out_of_bounds"
 
-var type_id: StringName
-var position: Vector3i
-var rotation: Vector3
-var slots := {}
+var type_id: StringName:
+	set(value):
+		if _read_only:
+			push_error("ROOMMATE: Param type_id of RoommateBlock is read-only.")
+			return
+		type_id = value
+
+var position: Vector3i:
+	set(value):
+		if _read_only:
+			push_error("ROOMMATE: Param position of RoommateBlock is read-only.")
+			return
+		position = value
+
+var rotation: Vector3:
+	set(value):
+		if _read_only:
+			push_error("ROOMMATE: Param rotation of RoommateBlock is read-only.")
+			return
+		rotation = value
+
+var slots := {}:
+	set(value):
+		if _read_only:
+			push_error("ROOMMATE: Param slots of RoommateBlock is read-only.")
+			return
+		slots = value
+
 var center: Vector3:
 	get: return (position as Vector3) + Vector3.ONE / 2
+
+var _read_only := false
 
 
 static func raycast(start: Vector3i, step: Vector3i, source_blocks: Dictionary) -> int:
@@ -30,6 +56,11 @@ static func raycast(start: Vector3i, step: Vector3i, source_blocks: Dictionary) 
 		result += 1
 		block = source_blocks.get(block.position + step) as RoommateBlock
 	return result
+
+
+func make_read_only() -> void:
+	_read_only = true
+	slots.make_read_only()
 
 
 class Slot:

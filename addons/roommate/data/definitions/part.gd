@@ -17,11 +17,13 @@ var mesh_transform := Transform3D.IDENTITY
 var collision_transform := Transform3D.IDENTITY
 var scene_transform := Transform3D.IDENTITY
 var nav_transform := Transform3D.IDENTITY
+var occluder_transform := Transform3D.IDENTITY
 
 var mesh: Mesh
 var collision_mesh: Mesh
 var scene: PackedScene
 var nav_mesh: Mesh
+var occluder_mesh: Mesh
 
 var scene_parent_path := NodePath()
 var scene_property_overrides := {}

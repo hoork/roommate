@@ -9,16 +9,25 @@
 @tool
 extends "./value_setter.gd"
 
+var _blend_over := true
+
 
 func override(color: Color) -> void:
 	_override_requested = true
 	_override_value = color
 
 
-func accumulate(color: Color) -> void:
+func accumulate(color: Color, new_alpha := -1.0, blend_over := true) -> void:
 	_accumulation_requested = true
+	if new_alpha >= 0:
+		color.a = new_alpha
 	_accumulation_value = color
+	_blend_over = blend_over
 
 
 func _handle_accumulation(current_value: Variant) -> Variant:
-	return current_value + _accumulation_value
+	var current_color := current_value as Color
+	var accumulation_color := _accumulation_value as Color
+	var color_under := current_color if _blend_over else accumulation_color
+	var color_over := accumulation_color if _blend_over else current_color
+	return color_under.blend(color_over)

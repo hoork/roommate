@@ -19,8 +19,9 @@ const MESH_SINGLE := &"mtid_single"
 const COLLISION_CONCAVE := &"csid_concave"
 const COLLISION_CONVEX := &"csid_convex"
 
-const NAV_BAKED := &"nmtid_baked"
-const NAV_ASSEMBLED := &"nmtid_assembled"
+const NAV_SINGLE := &"nmtid_single"
+
+const OCCLUDER_SINGLE := &"otid_single"
 
 const _SETTINGS := preload("../plugin_settings.gd")
 const _INTERNAL_STYLE := preload("../resources/internal_style.gd")
@@ -39,7 +40,7 @@ const _INTERNAL_STYLE := preload("../resources/internal_style.gd")
 
 @export_group("Mesh")
 @export_enum(MESH_SINGLE) var mesh_type := String(MESH_SINGLE)
-@export_node_path("Node3D") var linked_mesh_container: NodePath
+@export_node_path("MeshInstance3D") var linked_mesh_container: NodePath
 @export_file("*.tres", "*.res") var path_to_mesh_resource: String
 @export var create_mesh_container_if_missing := true
 @export var index_mesh := true
@@ -48,7 +49,7 @@ const _INTERNAL_STYLE := preload("../resources/internal_style.gd")
 
 @export_group("Collision")
 @export_enum(COLLISION_CONCAVE, COLLISION_CONVEX) var collision_shape := String(COLLISION_CONCAVE)
-@export_node_path("CollisionShape3D") var linked_collision_shape: NodePath
+@export_node_path("CollisionShape3D") var linked_collision_shape_container: NodePath
 @export_file("*.tres", "*.res") var path_to_collision_shape_resource: String
 
 @export_group("Scenes")
@@ -57,9 +58,14 @@ const _INTERNAL_STYLE := preload("../resources/internal_style.gd")
 @export var force_readable_scene_names := true
 
 @export_group("Navigation")
-@export_enum(NAV_BAKED, NAV_ASSEMBLED) var nav_mesh_type := String(NAV_BAKED)
-@export_node_path("NavigationRegion3D") var linked_navigation_region: NodePath
+@export_enum(NAV_SINGLE) var nav_mesh_type := String(NAV_SINGLE)
+@export_node_path("NavigationRegion3D") var linked_nav_mesh_container: NodePath
 @export_file("*.tres", "*.res") var path_to_nav_mesh_resource: String
+
+@export_group("Occlusion")
+@export_enum(OCCLUDER_SINGLE) var occluder_type := String(OCCLUDER_SINGLE)
+@export_node_path("OccluderInstance3D") var linked_occluder_container: NodePath
+@export_file("*.tres", "*.res", "*.occ") var path_to_occluder_resource: String
 
 var _part_processors := {
 	RoommateBlock.SPACE_TYPE: _process_space_block_part,
@@ -87,6 +93,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 	var collision_faces := PackedVector3Array()
 	var staged_scenes := {}
 	var nav_tool := SurfaceTool.new()
+	var occluder_tool := SurfaceTool.new()
 	
 	# generating everything
 	for block_position in all_blocks:
@@ -100,7 +107,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 			var processed_part := processor.call(slot_id, part, block, all_blocks) as RoommatePart
 			if processed_part:
 				_generate_part(processed_part, block, surface_tools, 
-						collision_faces, staged_scenes, nav_tool)
+						collision_faces, staged_scenes, nav_tool, occluder_tool)
 	
 	# applying mesh
 	match StringName(mesh_type):
@@ -110,27 +117,27 @@ func generate_with(all_blocks: Dictionary) -> void:
 			push_error("ROOMMATE: Unknown mesh type id %s." % mesh_type)
 	
 	# applying collision
-	var collision_shape_node := get_node_or_null(linked_collision_shape) as CollisionShape3D
-	if collision_shape_node:
+	var collision_shape_container := get_node_or_null(linked_collision_shape_container) as CollisionShape3D
+	if collision_shape_container:
 		var new_shape: Shape3D
 		match StringName(collision_shape):
 			COLLISION_CONCAVE:
 				var concave := ConcavePolygonShape3D.new()
-				if collision_shape_node.shape is ConcavePolygonShape3D:
-					concave = collision_shape_node.shape.duplicate(true) as ConcavePolygonShape3D
+				if collision_shape_container.shape is ConcavePolygonShape3D:
+					concave = collision_shape_container.shape.duplicate(true) as ConcavePolygonShape3D
 				concave.set_faces(collision_faces)
 				new_shape = concave
 			COLLISION_CONVEX:
 				var convex := ConvexPolygonShape3D.new()
-				if collision_shape_node.shape is ConvexPolygonShape3D:
-					convex = collision_shape_node.shape.duplicate(true) as ConvexPolygonShape3D
+				if collision_shape_container.shape is ConvexPolygonShape3D:
+					convex = collision_shape_container.shape.duplicate(true) as ConvexPolygonShape3D
 				convex.points = collision_faces.duplicate()
 				new_shape = convex
 			_:
 				push_error("ROOMMATE: Unknown collision shape id %s." % collision_shape)
 		if _try_save_resource(new_shape, path_to_collision_shape_resource, &"stid_collision_shape_resource_file_postfix"):
 			path_to_collision_shape_resource = new_shape.resource_path
-		collision_shape_node.shape = new_shape
+		collision_shape_container.shape = new_shape
 	
 	#applying scenes
 	clear_scenes()
@@ -164,32 +171,41 @@ func generate_with(all_blocks: Dictionary) -> void:
 					new_scene.set(property_name, property_overrides[property_name])
 	
 	# applying navigation
-	var navigation_region := get_node_or_null(linked_navigation_region) as NavigationRegion3D
-	if navigation_region:
+	var nav_mesh_container := get_node_or_null(linked_nav_mesh_container) as NavigationRegion3D
+	if nav_mesh_container:
 		match StringName(nav_mesh_type):
-			NAV_BAKED:
-				var on_bake_finished := func() -> void:
-					var baked_mesh := navigation_region.navigation_mesh
-					if _try_save_resource(baked_mesh, path_to_nav_mesh_resource, &"stid_nav_mesh_resource_file_postfix"):
-						path_to_nav_mesh_resource = baked_mesh.resource_path
-					navigation_region.navigation_mesh = baked_mesh
-				if not navigation_region.navigation_mesh:
-					navigation_region.navigation_mesh = NavigationMesh.new()
-				navigation_region.bake_finished.connect(on_bake_finished, CONNECT_ONE_SHOT)
-				navigation_region.bake_navigation_mesh(_SETTINGS.get_bool(&"stid_bake_nav_on_thread"))
-			NAV_ASSEMBLED:
+			NAV_SINGLE:
 				nav_tool.index()
 				var new_nav_mesh := NavigationMesh.new()
-				if navigation_region.navigation_mesh:
-					new_nav_mesh = navigation_region.navigation_mesh.duplicate(true) as NavigationMesh
+				if nav_mesh_container.navigation_mesh:
+					new_nav_mesh = nav_mesh_container.navigation_mesh.duplicate(true) as NavigationMesh
 				new_nav_mesh.create_from_mesh(nav_tool.commit())
 				
 				if _try_save_resource(new_nav_mesh, path_to_nav_mesh_resource, &"stid_nav_mesh_resource_file_postfix"):
 					path_to_nav_mesh_resource = new_nav_mesh.resource_path
-				navigation_region.navigation_mesh = new_nav_mesh
-				navigation_region.update_gizmos()
+				nav_mesh_container.navigation_mesh = new_nav_mesh
+				nav_mesh_container.update_gizmos()
 			_:
 				push_error("ROOMMATE: Unknown nav mesh type id %s." % nav_mesh_type)
+	
+	# applying occluder
+	var occluder_container := get_node_or_null(linked_occluder_container) as OccluderInstance3D
+	if occluder_container:
+		match StringName(occluder_type):
+			OCCLUDER_SINGLE:
+				occluder_tool.index()
+				var occluder := ArrayOccluder3D.new()
+				var occluder_arrays := occluder_tool.commit_to_arrays()
+				var vertices := PackedVector3Array(occluder_arrays[Mesh.ARRAY_VERTEX])
+				var indices := PackedInt32Array(occluder_arrays[Mesh.ARRAY_INDEX])
+				occluder.set_arrays(vertices, indices)
+				
+				if _try_save_resource(occluder, path_to_occluder_resource, &"stid_occluder_resource_file_postfix"):
+					path_to_occluder_resource = occluder.resource_path
+				occluder_container.occluder = occluder
+				occluder_container.update_gizmos()
+			_:
+				push_error("ROOMMATE: Unknown occluder type id %s." % occluder_type)
 
 
 func create_blocks() -> Dictionary:
@@ -294,7 +310,8 @@ func get_owned_scenes() -> Array[Node]:
 
 func _generate_part(part: RoommatePart, parent_block: RoommateBlock, 
 		surface_tools: Dictionary, collision_faces: PackedVector3Array,
-		staged_scenes: Dictionary, nav_tool: SurfaceTool) -> void:
+		staged_scenes: Dictionary, nav_tool: SurfaceTool, 
+		occluder_tool: SurfaceTool) -> void:
 	if not part:
 		return
 	var part_origin := parent_block.position * block_size + block_size * part.anchor
@@ -324,6 +341,11 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock,
 	if part.nav_mesh:
 		for surface_id in part.nav_mesh.get_surface_count():
 			nav_tool.append_from(part.nav_mesh, surface_id, part.nav_transform.translated(part_origin))
+	
+	if part.occluder_mesh:
+		for surface_id in part.occluder_mesh.get_surface_count():
+			occluder_tool.append_from(part.occluder_mesh, surface_id, 
+					part.occluder_transform.translated(part_origin))
 	
 	if not part.mesh:
 		return
