@@ -86,7 +86,7 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	var part_transform := Transform3D.IDENTITY.looking_at(-plane.normal, up_axis).scaled_local(Vector3(1, part_scale, 1))
 	var is_top_facing := extend_axis_index != Vector3.AXIS_Y and plane.normal.dot(Vector3.UP) >= 0
 	var oblique_part := _create_default_part(anchor, plane.normal if fill else Vector3.ZERO, 
-			part_transform, true, is_top_facing)
+			part_transform, is_top_facing)
 	
 	var oblique_hide_predicate := func(part: RoommatePart) -> bool:
 		var flow_dot := plane.normal.dot(part.flow)

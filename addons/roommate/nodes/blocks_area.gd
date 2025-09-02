@@ -148,7 +148,7 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 
 
 func _create_default_part(anchor: Vector3, flow: Vector3, part_transform: Transform3D, 
-		set_mesh := true, set_nav := false, set_occluder := true) -> RoommatePart:
+		set_nav := false, set_occluder := true, set_mesh := true) -> RoommatePart:
 	var result := RoommatePart.new()
 	result.anchor = anchor
 	result.flow = flow
@@ -173,13 +173,13 @@ func _create_space_parts() -> Dictionary:
 		RoommateBlock.Slot.CEIL: _create_default_part(Vector3(0.5, 1, 0.5), Vector3i.UP, 
 				Transform3D.IDENTITY.rotated(Vector3.RIGHT, PI / 2)),
 		RoommateBlock.Slot.FLOOR: _create_default_part(Vector3(0.5, 0, 0.5), Vector3i.DOWN, 
-				Transform3D.IDENTITY.rotated(Vector3.LEFT, PI / 2), true, true),
+				Transform3D.IDENTITY.rotated(Vector3.LEFT, PI / 2), true),
 		RoommateBlock.Slot.WALL_LEFT: _create_default_part(Vector3(0, 0.5, 0.5), Vector3i.LEFT, 
-				Transform3D.IDENTITY.rotated(Vector3.UP, PI / 2), true, false),
+				Transform3D.IDENTITY.rotated(Vector3.UP, PI / 2)),
 		RoommateBlock.Slot.WALL_RIGHT: _create_default_part(Vector3(1, 0.5, 0.5), Vector3i.RIGHT, 
-				Transform3D.IDENTITY.rotated(Vector3.DOWN, PI / 2), true, false),
+				Transform3D.IDENTITY.rotated(Vector3.DOWN, PI / 2)),
 		RoommateBlock.Slot.WALL_FORWARD: _create_default_part(Vector3(0.5, 0.5, 0), Vector3i.FORWARD, 
-				Transform3D.IDENTITY, true, false),
+				Transform3D.IDENTITY),
 		RoommateBlock.Slot.WALL_BACK: _create_default_part(Vector3(0.5, 0.5, 1), Vector3i.BACK, 
-				Transform3D.IDENTITY.rotated(Vector3.UP, PI), true, false),
+				Transform3D.IDENTITY.rotated(Vector3.UP, PI)),
 	}
