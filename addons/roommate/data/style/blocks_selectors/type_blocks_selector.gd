@@ -17,5 +17,5 @@ func _init(init_target_type_id: StringName) -> void:
 
 
 func _block_is_selected(offset_position: Vector3i, block: RoommateBlock, 
-		source_blocks: Dictionary) -> bool:
+		blocks_scope: Dictionary) -> bool:
 	return block.type_id == target_type_id

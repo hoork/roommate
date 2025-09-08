@@ -21,11 +21,11 @@ func _init(init_check_selection: Callable, init_prepare_vars: Callable) -> void:
 	prepare_vars = init_prepare_vars
 
 
-func prepare(source_blocks: Dictionary) -> void:
+func prepare(blocks_scope: Dictionary) -> void:
 	_check_selection_valid = true
 	_prepared_vars = {}
 	if prepare_vars.is_valid():
-		var new_vars := prepare_vars.call(source_blocks)
+		var new_vars := prepare_vars.call(blocks_scope)
 		if new_vars is Dictionary:
 			_prepared_vars = new_vars
 		else:
@@ -33,7 +33,7 @@ func prepare(source_blocks: Dictionary) -> void:
 
 
 func _block_is_selected(offset_position: Vector3i, block: RoommateBlock, 
-		source_blocks: Dictionary) -> bool:
+		blocks_scope: Dictionary) -> bool:
 	if not _check_selection_valid:
 		return false
 	if not check_selection.is_valid():
@@ -41,7 +41,7 @@ func _block_is_selected(offset_position: Vector3i, block: RoommateBlock,
 		push_error("ROOMMATE: check_selection is not valid callback.")
 		return false
 	
-	var check_value := check_selection.call(offset_position, block, source_blocks, 
+	var check_value := check_selection.call(offset_position, block, blocks_scope, 
 			_prepared_vars)
 	if not check_value is bool:
 		_check_selection_valid = false

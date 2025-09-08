@@ -30,13 +30,14 @@ static func get_or_default(setting_id: StringName) -> Variant:
 	var path := _get_path(setting_id)
 	var default_value: Variant = _DEFAULTS.settings[setting_id]
 	if not ProjectSettings.has_setting(path):
-		push_error("ROOMMATE: Project setting %s doesn't exists." % path)
+		if Engine.is_editor_hint():
+			push_error("ROOMMATE: Project setting %s doesn't exists." % path)
 		return default_value
 	var value := ProjectSettings.get_setting_with_override(path)
 	if typeof(value) != typeof(default_value):
 		push_error("ROOMMATE: Wrong type of project setting %s. Type %d expected." % [path, typeof(default_value)])
 		return default_value
-	return ProjectSettings.get_setting_with_override(path)
+	return value
 
 
 static func _get_path(settind_id: StringName) -> String:

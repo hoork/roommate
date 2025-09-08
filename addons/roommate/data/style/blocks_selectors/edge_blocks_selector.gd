@@ -17,11 +17,11 @@ func _init(init_segments: Array[RoommateSegment]) -> void:
 
 
 func _block_is_selected(offset_position: Vector3i, block: RoommateBlock, 
-		source_blocks: Dictionary) -> bool:
-	if not source_blocks.has(offset_position):
+		blocks_scope: Dictionary) -> bool:
+	if not blocks_scope.has(offset_position):
 		return false
 	for segment in segments:
-		var count := RoommateBlock.raycast(offset_position, segment.step, source_blocks)
+		var count := RoommateBlock.raycast(offset_position, segment.step, blocks_scope)
 		if count > segment.max_steps:
 			return false
 	return true

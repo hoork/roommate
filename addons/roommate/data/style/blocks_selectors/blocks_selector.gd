@@ -14,9 +14,9 @@ var mode := &"omid_include"
 var offset := Vector3i.ZERO
 
 
-func update_inclusion(block: RoommateBlock, source_blocks: Dictionary,
+func update_inclusion(block: RoommateBlock, blocks_scope: Dictionary,
 		is_included: bool) -> bool:
-	if not _block_is_selected(block.position - offset, block, source_blocks):
+	if not _block_is_selected(block.position - offset, block, blocks_scope):
 		if mode == &"omid_intersect":
 			return false
 		return is_included
@@ -55,10 +55,10 @@ func set_offset(new_offset: Vector3i) -> void:
 	offset = new_offset
 
 
-func prepare(source_blocks: Dictionary) -> void: # virtual method
+func prepare(blocks_scope: Dictionary) -> void: # virtual method
 	pass
 
 
 func _block_is_selected(offset_position: Vector3i, block: RoommateBlock, 
-		source_blocks: Dictionary) -> bool: # virtual method
+		blocks_scope: Dictionary) -> bool: # virtual method
 	return false

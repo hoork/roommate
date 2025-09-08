@@ -19,13 +19,13 @@ func _init(init_interval: Vector3i, init_global := false) -> void:
 	global_space = init_global
 
 
-func prepare(source_blocks: Dictionary) -> void: # virtual method
+func prepare(blocks_scope: Dictionary) -> void: # virtual method
 	_min_position = Vector3i.ZERO 
 	if not global_space:
-		_min_position = source_blocks.keys().min() as Vector3i
+		_min_position = blocks_scope.keys().min() as Vector3i
 
 
 func _block_is_selected(offset_position: Vector3i, block: RoommateBlock, 
-		source_blocks: Dictionary) -> bool:
+		blocks_scope: Dictionary) -> bool:
 	var position := offset_position - _min_position
 	return position.snapped(interval) == position

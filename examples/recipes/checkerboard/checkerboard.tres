@@ -1,0 +1,6 @@
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://q1l8gtfp6x7e"]
+
+[ext_resource type="Script" path="res://examples/recipes/checkerboard/checkerboard.gd" id="1_o7xxa"]
+
+[resource]
+script = ExtResource("1_o7xxa")

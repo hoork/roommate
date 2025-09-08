@@ -22,12 +22,12 @@ func apply_style(all_blocks: Dictionary, root_transform: Transform3D,
 		block_size: float) -> void:
 	if not style:
 		return
-	var area_blocks := {}
+	var blocks_scope := {}
 	_prepare_for_style(all_blocks, root_transform, block_size)
 	for block_position in all_blocks:
 		if _block_is_selected_for_style(all_blocks[block_position], all_blocks):
-			area_blocks[block_position] = all_blocks[block_position]
-	style.apply(area_blocks)
+			blocks_scope[block_position] = all_blocks[block_position]
+	style.apply(blocks_scope)
 
 
 func _prepare_for_style(all_blocks: Dictionary, root_transform: Transform3D, 

@@ -23,11 +23,11 @@ const _RULESET := preload("../data/style/ruleset.gd")
 var _current_rulesets: Array[_RULESET] = []
 
 
-func apply(source_blocks: Dictionary) -> void:
+func apply(blocks_scope: Dictionary) -> void:
 	_current_rulesets.clear()
 	_build_rulesets()
 	for ruleset in _current_rulesets:
-		ruleset.apply(source_blocks)
+		ruleset.apply(blocks_scope)
 	_current_rulesets.clear()
 
 

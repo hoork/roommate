@@ -18,12 +18,12 @@ func _init(init_axis: Vector3) -> void:
 	axis = init_axis
 
 
-func prepare(source_blocks: Dictionary) -> void:
+func prepare(blocks_scope: Dictionary) -> void:
 	const AXIS_COUNT := 3
 	
 	_max_position = -Vector3.INF
 	_min_position = Vector3.INF
-	for key in source_blocks.keys():
+	for key in blocks_scope.keys():
 		var position := key as Vector3i
 		for i in AXIS_COUNT:
 			_max_position[i] = maxf(_max_position[i], position[i])
@@ -31,7 +31,7 @@ func prepare(source_blocks: Dictionary) -> void:
 
 
 func _block_is_selected(offset_position: Vector3i, block: RoommateBlock, 
-		source_blocks: Dictionary) -> bool:
+		blocks_scope: Dictionary) -> bool:
 	const AXIS_COUNT := 3
 	
 	if not AABB(_min_position, Vector3.ZERO).expand(_max_position).has_point(offset_position):

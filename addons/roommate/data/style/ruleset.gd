@@ -25,18 +25,18 @@ var _blocks_selectors: Array[_BLOCKS_SELECTOR] = []
 var _parts_setters: Array[_PARTS_SETTER] = []
 
 
-func apply(source_blocks: Dictionary) -> void:
+func apply(blocks_scope: Dictionary) -> void:
 	if _blocks_selectors.size() == 0:
 		push_warning("ROOMMATE: Ruleset doesn't have blocks selectors.")
 	if _parts_setters.size() == 0:
 		push_warning("ROOMMATE: Ruleset doesn't have parts setters.")
 	for blocks_selector in _blocks_selectors:
-		blocks_selector.prepare(source_blocks)
-	for block_position in source_blocks:
+		blocks_selector.prepare(blocks_scope)
+	for block_position in blocks_scope:
 		var include := false
-		var block := source_blocks[block_position] as RoommateBlock
+		var block := blocks_scope[block_position] as RoommateBlock
 		for blocks_selector in _blocks_selectors:
-			include = blocks_selector.update_inclusion(block, source_blocks, include)
+			include = blocks_selector.update_inclusion(block, blocks_scope, include)
 		if not include:
 			continue
 		for setter in _parts_setters:

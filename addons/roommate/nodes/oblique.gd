@@ -43,6 +43,15 @@ static func get_extend_axis_index(block_rotation: Vector3) -> int:
 	return (Quaternion.from_euler(block_rotation) * Vector3.RIGHT).abs().max_axis_index()
 
 
+static func _get_oblique_block_anchor(block_position: Vector3i, oblique_plane: Plane,
+		up_axis: Vector3) -> Vector3:
+	var center := (block_position as Vector3) + Vector3.ONE / 2
+	var ray_front := oblique_plane.intersects_ray(center, up_axis)
+	var ray_back := oblique_plane.intersects_ray(center, -up_axis)
+	var intersection := ray_front as Vector3 if ray_front else ray_back as Vector3
+	return intersection - center + Vector3.ONE / 2
+
+
 func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlock:
 	new_block.type_id = RoommateBlock.OBLIQUE_TYPE
 	
@@ -60,15 +69,18 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	forward_axis[up_axis.max_axis_index()] = 0
 	
 	var plane := get_oblique_plane(new_block.rotation, blocks_range)
-	var ray_front := plane.intersects_ray(new_block.center, up_axis)
-	var ray_back := plane.intersects_ray(new_block.center, -up_axis)
-	var intersection := ray_front as Vector3 if ray_front else ray_back as Vector3
-	var anchor := intersection - new_block.center + Vector3.ONE / 2
-	var plane_distance := plane.distance_to(new_block.center)
-	var has_fill := plane_distance <= minf(-fill_start_distance, 0) and fill
+	
+	var has_fill := fill and plane.distance_to(new_block.center) <= minf(-fill_start_distance, 0)
 	var is_over_plane := plane.is_point_over(new_block.center)
 	
-	if not anchor.clamp(Vector3.ZERO, Vector3.ONE).is_equal_approx(anchor):
+	var anchor := _get_oblique_block_anchor(new_block.position, plane, up_axis)
+	var anchor_valid := anchor.clamp(Vector3.ZERO, Vector3.ONE).is_equal_approx(anchor)
+	
+	var anchor_up := _get_oblique_block_anchor(new_block.position + (up_axis as Vector3i),
+			plane, up_axis)
+	var anchor_up_valid := anchor_up.clamp(Vector3.ZERO, Vector3.ONE).is_equal_approx(anchor_up)
+	
+	if not anchor_valid or anchor_up_valid:
 		if has_fill:
 			new_block.type_id = RoommateBlock.OUT_OF_BOUNDS_TYPE
 			return new_block

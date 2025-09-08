@@ -92,3 +92,7 @@ func override_fallback_surface() -> _SURFACE_OVERRIDE_SETTER:
 	if not fallback_surface_override:
 		fallback_surface_override = _SURFACE_OVERRIDE_SETTER.new()
 	return fallback_surface_override
+
+
+func invert_selection() -> void:
+	inverse_selection = true
