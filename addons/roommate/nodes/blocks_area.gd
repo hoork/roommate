@@ -143,6 +143,10 @@ func find_root() -> RoommateRoot:
 	return parent as RoommateRoot
 
 
+func get_type_order() -> float: # virtual method
+	return 0
+
+
 func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlock: # virtual method
 	return null
 

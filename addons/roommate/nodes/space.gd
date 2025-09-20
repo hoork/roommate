@@ -17,6 +17,10 @@ extends RoommateBlocksArea
 ## directed inwards block.
 
 
+func get_type_order() -> float:
+	return 10
+
+
 func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlock:
 	new_block.type_id = RoommateBlock.SPACE_TYPE;
 	new_block.slots = _create_space_parts()

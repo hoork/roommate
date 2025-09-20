@@ -143,6 +143,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 	clear_scenes()
 	var scene_paths: Array[NodePath] = []
 	scene_paths.assign(staged_scenes.keys())
+	# creating scenes starting from least nested to most nested
 	var sort_by_node_path := func(a: NodePath, b: NodePath) -> bool:
 		return a.get_name_count() < b.get_name_count()
 	scene_paths.sort_custom(sort_by_node_path)
@@ -216,6 +217,8 @@ func create_blocks() -> Dictionary:
 		return {}
 	
 	var sort_areas := func (a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
+		if a.blocks_apply_order == b.blocks_apply_order:
+			return a.get_type_order() < b.get_type_order()
 		return a.blocks_apply_order < b.blocks_apply_order
 	areas.sort_custom(sort_areas)
 	

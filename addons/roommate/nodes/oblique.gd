@@ -52,6 +52,10 @@ static func _get_oblique_block_anchor(block_position: Vector3i, oblique_plane: P
 	return intersection - center + Vector3.ONE / 2
 
 
+func get_type_order() -> float:
+	return 20
+
+
 func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlock:
 	new_block.type_id = RoommateBlock.OBLIQUE_TYPE
 	
