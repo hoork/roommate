@@ -1,37 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   id="Слой_2"
-   data-name="Слой 2"
-   viewBox="0 0 16 16"
+   id="space"
    version="1.1"
-   sodipodi:docname="space.svg"
-   inkscape:version="1.3 (0e150ed, 2023-07-21)"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   width="16"
+   height="16"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
-  <defs
-     id="defs1" />
-  <sodipodi:namedview
-     id="namedview1"
-     pagecolor="#505050"
-     bordercolor="#ffffff"
-     borderopacity="1"
-     inkscape:showpageshadow="0"
-     inkscape:pageopacity="0"
-     inkscape:pagecheckerboard="1"
-     inkscape:deskcolor="#d1d1d1"
-     inkscape:zoom="35.974058"
-     inkscape:cx="7.7694878"
-     inkscape:cy="7.0328458"
-     inkscape:window-width="1880"
-     inkscape:window-height="1011"
-     inkscape:window-x="0"
-     inkscape:window-y="38"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="Слой_2" />
-  <title
-     id="title1">Кириллино</title>
   <path
      d="M 15.639561,4.130746 8.5046728,0.129874 a 1.1069079,1.1069079 0 0 0 -1.000218,0 L 0.35623018,4.130746 C -0.31058182,4.517497 0.03616042,5.3310076 0.8630073,5.3310076 H 1.3297757 V 16 H 14.666016 V 5.3310076 h 0.480104 c 0.85352,0 1.173589,-0.8135106 0.493441,-1.2002616 z M 12.66558,13.999564 H 3.3302117 V 5.9978196 H 12.66558 Z"
      fill="#fc7f7f"

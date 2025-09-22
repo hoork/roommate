@@ -1,7 +1,7 @@
 [gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://bbhljl53ag4ya"]
 
-[ext_resource type="Texture2D" uid="uid://cut8csj0nvslq" path="res://addons/roommate/defaults/default_texture.png" id="1_yeba2"]
+[ext_resource type="Texture2D" uid="uid://h1srlkjrdyal" path="res://addons/roommate/defaults/default_texture.svg" id="1_l7wtc"]
 
 [resource]
 vertex_color_use_as_albedo = true
-albedo_texture = ExtResource("1_yeba2")
+albedo_texture = ExtResource("1_l7wtc")

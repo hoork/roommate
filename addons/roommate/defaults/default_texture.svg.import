@@ -2,26 +2,23 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ce574usof8m7e"
-path="res://.godot/imported/out_of_bounds.svg-c0be4c5bc1740bfd969eb2402cced947.ctex"
+uid="uid://h1srlkjrdyal"
+path="res://.godot/imported/default_texture.svg-2c4d0f7292db0e4afcfabdf85433cf2d.ctex"
 metadata={
-"editor_dark_theme": true,
-"editor_scale": 1.5,
-"has_editor_variant": true,
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/roommate/icons/out_of_bounds.svg"
-dest_files=["res://.godot/imported/out_of_bounds.svg-c0be4c5bc1740bfd969eb2402cced947.ctex"]
+source_file="res://addons/roommate/defaults/default_texture.svg"
+dest_files=["res://.godot/imported/default_texture.svg-2c4d0f7292db0e4afcfabdf85433cf2d.ctex"]
 
 [params]
 
 compress/mode=1
 compress/high_quality=false
 compress/lossy_quality=0.7
-compress/hdr_compression=1
+compress/hdr_compression=0
 compress/normal_map=2
 compress/channel_pack=1
 mipmaps/generate=false
@@ -36,5 +33,5 @@ process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=0
 svg/scale=1.0
-editor/scale_with_editor_scale=true
-editor/convert_colors_with_editor_theme=true
+editor/scale_with_editor_scale=false
+editor/convert_colors_with_editor_theme=false

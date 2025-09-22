@@ -1,37 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   id="Слой_2"
-   data-name="Слой 2"
-   viewBox="0 0 16 16"
+   id="out_of_bounds"
    version="1.1"
-   sodipodi:docname="out_of_bounds.svg"
-   inkscape:version="1.3 (0e150ed, 2023-07-21)"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   width="16"
+   height="16"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <defs
-     id="defs1" />
-  <sodipodi:namedview
-     id="namedview1"
-     pagecolor="#505050"
-     bordercolor="#ffffff"
-     borderopacity="1"
-     inkscape:showpageshadow="0"
-     inkscape:pageopacity="0"
-     inkscape:pagecheckerboard="1"
-     inkscape:deskcolor="#d1d1d1"
-     inkscape:zoom="35.974058"
-     inkscape:cx="7.157936"
-     inkscape:cy="6.8382612"
-     inkscape:window-width="1880"
-     inkscape:window-height="1011"
-     inkscape:window-x="0"
-     inkscape:window-y="38"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="Слой_2" />
-  <title
-     id="title1">Кириллино</title>
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
   <path
      d="M 15.632509,4.1343267 8.5042129,0.13715157 a 1.1058851,1.1058851 0 0 0 -0.9992937,0 L 0.36329966,4.1343267 C -0.30289619,4.5207203 0.04352565,5.3334792 0.8696085,5.3334792 H 1.3359456 V 15.992613 H 14.659863 V 5.3334792 h 0.479661 c 0.85273,0 1.172504,-0.8127589 0.492985,-1.1991525 z"
      fill="#fc7f7f"
