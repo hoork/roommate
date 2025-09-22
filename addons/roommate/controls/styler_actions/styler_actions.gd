@@ -14,13 +14,12 @@ func visibility_predicate(nodes: Array[Node]) -> bool:
 	if nodes.is_empty():
 		return false
 	var is_extends := func(node: Node) -> bool:
-		return node is RoommateBlocksArea
+		return node is RoommateStyler and not node is RoommateBlocksArea
 	return nodes.all(is_extends)
 
 
 func _build_menu() -> void:
 	_add_button("Generate Related Root", &"stid_generate_root_nodes_shortcut", _generate)
-	_add_button("Snap Area To Blocks", &"stid_snap_roots_areas_shortcut", _snap)
 
 
 func _generate() -> void:
@@ -28,10 +27,3 @@ func _generate() -> void:
 	if roots.is_empty():
 		return
 	plugin.actions.generate_roots(roots)
-
-
-func _snap() -> void:
-	var areas := _get_blocks_areas()
-	if areas.is_empty():
-		return
-	plugin.actions.snap_areas(areas)

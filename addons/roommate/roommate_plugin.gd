@@ -1,6 +1,6 @@
 # Copyright (c) 2025 Kirill Rozhkov.
 #
-# This file is part of Roommate plugin: https://github.com/Hoork/Roommate
+# This file is part of Roommate plugin: https://github.com/hoork/roommate
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -15,6 +15,7 @@ const _EDITOR_ACTIONS := preload("./editor_actions.gd")
 const _CONTROL_SCENES: Array[PackedScene] = [
 	preload("./controls/root_actions/root_actions.tscn"),
 	preload("./controls/blocks_area_actions/blocks_area_actions.tscn"),
+	preload("./controls/styler_actions/styler_actions.tscn"),
 ]
 
 var settings: _SETTINGS

@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://uugapbqynah7"]
+
+[ext_resource type="Script" path="res://addons/roommate/controls/styler_actions/styler_actions.gd" id="1_gvpym"]
+[ext_resource type="Texture2D" uid="uid://bxhhxpcdbrhhy" path="res://addons/roommate/icons/styler.svg" id="1_oh5np"]
+
+[node name="RoommateStylerActions" type="MenuButton"]
+offset_right = 8.0
+offset_bottom = 8.0
+text = "RoommateStyler"
+icon = ExtResource("1_oh5np")
+script = ExtResource("1_gvpym")

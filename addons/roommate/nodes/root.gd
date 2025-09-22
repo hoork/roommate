@@ -1,6 +1,6 @@
 # Copyright (c) 2025 Kirill Rozhkov.
 #
-# This file is part of Roommate plugin: https://github.com/Hoork/Roommate
+# This file is part of Roommate plugin: https://github.com/hoork/roommate
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -13,6 +13,8 @@ extends Node3D
 ## Node that creates mesh, collision and scenes. 
 ## 
 ## Set [RoommateBlocksArea] or it's derived nodes as a child to affect generation.
+
+signal generated
 
 const MESH_SINGLE := &"mtid_single"
 
@@ -29,7 +31,7 @@ const _INTERNAL_STYLE := preload("../resources/internal_style.gd")
 @export var block_size := 1.0:
 	set(value):
 		block_size = value if value > 0 else 1
-		for node in find_children("*", &"RoommateBlocksArea"):
+		for node in find_children("*", &"RoommateBlocksArea", true, false):
 			var area := node as RoommateBlocksArea
 			area.update_gizmos()
 
@@ -207,6 +209,9 @@ func generate_with(all_blocks: Dictionary) -> void:
 				occluder_container.update_gizmos()
 			_:
 				push_error("ROOMMATE: Unknown occluder type id %s." % occluder_type)
+	
+	if not Engine.is_editor_hint():
+		generated.emit()
 
 
 func create_blocks() -> Dictionary:
@@ -274,8 +279,8 @@ func snap_areas() -> void:
 
 
 func get_owned_nodes(node_class_name: StringName) -> Array[Node]:
-	var child_nodes := find_children("*", node_class_name)
-	var child_roots := find_children("*", &"RoommateRoot")
+	var child_nodes := find_children("*", node_class_name, true, false)
+	var child_roots := find_children("*", &"RoommateRoot", true, false)
 	var nodes: Array[Node] = []
 	var filter_by_parents := func (target: Node) -> bool:
 		for parent in child_roots:
@@ -299,8 +304,11 @@ func get_owned_stylers() -> Array[RoommateStyler]:
 
 
 func get_owned_scenes() -> Array[Node]:
+	if not is_inside_tree():
+		push_warning("ROOMMATE: RoommateRoot must be inside tree when getting owned scenes.")
+		return []
 	var all_scenes := get_tree().get_nodes_in_group(_SETTINGS.get_string(&"stid_scenes_group"))
-	var child_roots := find_children("*", &"RoommateRoot")
+	var child_roots := find_children("*", &"RoommateRoot", true, false)
 	var filter_by_parents_and_self := func (target: Node) -> bool:
 		if not is_ancestor_of(target):
 			return false
@@ -457,12 +465,14 @@ func _resolve_scene_parent(parent_path: NodePath) -> Node:
 
 
 func _try_save_resource(new_resource: Resource, path_to_resource: String, postfix_setting: StringName) -> bool:
-	if not Engine.is_editor_hint():
-		return false
 	var path := path_to_resource
 	var auto_creation_requested := auto_create_resource_files and path.is_empty()
 	if auto_creation_requested:
-		var scene_path := get_tree().edited_scene_root.scene_file_path
+		if not is_inside_tree():
+			push_error("ROOMMATE: RoommateRoot must be inside tree when saving resource.")
+			return false
+		var scene_node := get_tree().edited_scene_root if Engine.is_editor_hint() else get_tree().current_scene
+		var scene_path := scene_node.scene_file_path
 		var postfix := _SETTINGS.get_string(postfix_setting)
 		path = scene_path.path_join("..").simplify_path().path_join(name.to_snake_case() + postfix)
 	if ResourceLoader.exists(path) or auto_creation_requested:
