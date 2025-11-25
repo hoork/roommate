@@ -51,7 +51,7 @@ ruleset.select_blocks_by_extreme(Vector3i.FORWARD)
 
 ![](../assets/images/blocks_selectors/extreme.webp)
 
-If you pass 0 as a value for certain axis, it will be ignored, ie selection will be extruded along that axis. Number means how much rows will be selected from min/max positions. 
+By passing 0 as a value for certain axis, it will be ignored, i.e. selection will be extruded along that axis. Number means how much rows will be selected from min/max positions. 
 
 ```gdscript
 ruleset.select_blocks_by_extreme(Vector3i(2, 0, -1))
@@ -61,7 +61,7 @@ ruleset.select_blocks_by_extreme(Vector3i(2, 0, -1))
 
 ### select_edge_blocks
 
-Block is selected if it's near edge. You pass `RoommateSegment` object to `select_edge_blocks` 
+Block is selected if it's near edge. Array of `RoommateSegment` must be passed as a parameter. 
 
 ```gdscript
 var segment_left := RoommateSegment.new(Vector3i.LEFT, 0)
@@ -70,7 +70,7 @@ ruleset.select_edge_blocks([segment_left])
 
 ![](../assets/images/blocks_selectors/edge_1_step_1.webp)
 
-You can change `max_steps` parameter, 
+Size of selection can be increased by changing `max_steps` parameter, 
 
 ```gdscript
 var segment_left := RoommateSegment.new(Vector3i.LEFT, 1)
@@ -79,7 +79,7 @@ ruleset.select_edge_blocks([segment_left])
 
 ![](../assets/images/blocks_selectors/edge_1_step_2.webp)
 
-If you pass multiple segments, block is selected if both of them are satisfied.
+By passing multiple segments, block selection can be limited .
 
 ```gdscript
 var segment_left := RoommateSegment.new(Vector3i.LEFT, 0)
@@ -97,7 +97,7 @@ ruleset.select_edge_blocks_axis(Vector3i(-1, -1, 0))
 
 ### select_interval_blocks
 
-You can select blocks by interval.
+Selects blocks by interval along several axes. In this example blocks are selected along X axis with step 2.
 
 ```gdscript
 ruleset.select_interval_blocks(Vector3i(2, 0, 0))
@@ -105,7 +105,7 @@ ruleset.select_interval_blocks(Vector3i(2, 0, 0))
 
 ![](../assets/images/blocks_selectors/interval.webp)
 
-a
+Block selection can be limited by using multiple axes. 
 
 ```gdscript
 ruleset.select_interval_blocks(Vector3i(2, 3, 0))
@@ -115,7 +115,7 @@ ruleset.select_interval_blocks(Vector3i(2, 3, 0))
 
 ### select_inner_blocks
 
-a
+The most distant blocks from edges are selected along the axes.
 
 ```gdscript
 var segment_forward := RoommateSegment.new(Vector3.FORWARD, 0)
@@ -124,7 +124,7 @@ ruleset.select_inner_blocks([segment_forward])
 
 ![](../assets/images/blocks_selectors/inner_1_step_0.webp)
 
-a
+Set max_step parameter to positive number in `RoommateSegment` to increase distance tolerance.
 
 ```gdscript
 var segment_forward := RoommateSegment.new(Vector3.FORWARD, 1)
@@ -133,7 +133,7 @@ ruleset.select_inner_blocks([segment_forward])
 
 ![](../assets/images/blocks_selectors/inner_1_step_1.webp)
 
-a
+Selection of blocks can be limited, by using multiple segments with different axes.
 
 ```gdscript
 var segment_forward := RoommateSegment.new(Vector3.FORWARD, 0)
@@ -143,7 +143,7 @@ ruleset.select_inner_blocks([segment_forward, segment_up])
 
 ![](../assets/images/blocks_selectors/inner_2.webp)
 
-a
+For convinience, these functions are exists. The result are the same as above
 
 ```gdscript
 ruleset.select_inner_blocks_uniform([Vector3i.FORWARD, Vector3i.UP], 0)
@@ -155,7 +155,11 @@ ruleset.select_inner_blocks_axis(Vector3i(0, 1, -1))
 
 ### select_random_blocks
 
-a
+Randomly selects blocks in the scope. 
+
+First parameter is `density` must be between 0 and 1, and it's represents how many blocks are selected (0 is nothing selected, 1 is everything selected). 
+
+Second parameter accepts `RandomNumberGenerator` and is used to generate random numbers. If second parameter is null, `randf()` is used instead.
 
 ```gdscript
 var rng := RandomNumberGenerator.new()
@@ -165,11 +169,13 @@ ruleset.select_random_blocks(0.4, rng)
 
 ![](../assets/images/blocks_selectors/random.webp)
 
-a
-
 ### select_blocks
 
-a
+Use this selector if there is need for more control over block selection. 
+
+First parameter is prepare callback.  It's called before block selection process. Use `block_scope` to calculate values. Dictionary with calculated values must be returned, which is passed to selection callback.
+
+Second parameter is block selection callback. Calculated values can be used here via `prepared_vars` parameter. Return true if blocks should be selected, otherwise false.
 
 ```gdscript
 var prepare := func (blocks_scope: Dictionary) -> Dictionary:
@@ -192,7 +198,7 @@ ruleset.select_blocks(is_block_selected, prepare)
 
 ## Blocks Selector Inclusion modes
 
-asd
+There is also an option to change inclusion mode of each selector. Code below will be used as example on how inclusion mode affects selection.
 
 ```gdscript
 @tool
@@ -212,17 +218,15 @@ func _build_rulesets() -> void:
 
 ### include
 
-a
+Selects block no matter if it's selected or not. This is default behaviour and therefore result same as above.
 
 ```gdscript
 selector.include()
 ```
 
-a
-
 ### exclude
 
-a
+Opposite of `include`. It's deselecting blocks no matter if it's selected or not.
 
 ```gdscript
 selector.exclude()
@@ -232,7 +236,7 @@ selector.exclude()
 
 ### invert
 
-a
+Inverts selection. If block already selected, it's unselect it. If block is not selected, it's selected
 
 ```gdscript
 selector.invert()
@@ -242,7 +246,7 @@ selector.invert()
 
 ### intersect
 
-a
+Select only blocks that already selected. Other blocks are deselected.
 
 ```gdscript
 selector.intersect()
