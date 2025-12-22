@@ -1,11 +1,11 @@
-[gd_scene load_steps=11 format=3 uid="uid://dq56pusvke8yj"]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://addons/roommate/nodes/root.gd" id="1_iu5u6"]
 [ext_resource type="Script" path="res://addons/roommate/nodes/styler.gd" id="2_8biux"]
 [ext_resource type="Script" path="res://addons/roommate/nodes/space.gd" id="3_mi7pr"]
-[ext_resource type="Script" path="res://addons/roommate/resources/simple_style.gd" id="3_qmqe3"]
+[ext_resource type="Script" path="res://addons/roommate/resources/settings/simple_style.gd" id="3_qmqe3"]
 [ext_resource type="Material" uid="uid://bbhljl53ag4ya" path="res://addons/roommate/defaults/default_material.tres" id="4_50lii"]
-[ext_resource type="Script" path="res://addons/roommate/resources/simple_ruleset.gd" id="4_vr0p1"]
+[ext_resource type="Script" path="res://addons/roommate/resources/settings/simple_ruleset.gd" id="4_vr0p1"]
 
 [sub_resource type="Resource" id="Resource_rolxh"]
 script = ExtResource("4_vr0p1")

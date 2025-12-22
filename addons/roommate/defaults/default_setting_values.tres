@@ -1,6 +1,6 @@
-[gd_resource type="Resource" load_steps=5 format=3 uid="uid://r6yvyposmop4"]
+[gd_resource type="Resource" load_steps=5 format=3 uid="uid://dh3uk80or3bxu"]
 
-[ext_resource type="Script" path="res://addons/roommate/resources/default_setting_values.gd" id="1_s157l"]
+[ext_resource type="Script" path="res://addons/roommate/resources/styles/default_setting_values.gd" id="1_s157l"]
 
 [sub_resource type="InputEventKey" id="InputEventKey_425sl"]
 device = -1

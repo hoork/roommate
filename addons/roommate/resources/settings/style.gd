@@ -7,7 +7,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
-@icon("../icons/style.svg")
+@icon("../../icons/style.svg")
 class_name RoommateStyle
 extends Resource
 ## Base class for generating rulesets and changing [RoommatePart]
@@ -18,7 +18,7 @@ extends Resource
 ## [br][br]
 ## It can be used in [RoommateRoot], [RoommateBlocksArea] and it's derived classes.
 
-const _RULESET := preload("../data/style/ruleset.gd")
+const _RULESET := preload("../../data/style/ruleset.gd")
 
 var _current_rulesets: Array[_RULESET] = []
 

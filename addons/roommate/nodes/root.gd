@@ -26,7 +26,7 @@ const NAV_SINGLE := &"nmtid_single"
 const OCCLUDER_SINGLE := &"otid_single"
 
 const _SETTINGS := preload("../plugin_settings.gd")
-const _INTERNAL_STYLE := preload("../resources/internal_style.gd")
+const _INTERNAL_STYLE := preload("../resources/settings/internal_style.gd")
 
 @export var block_size := 1.0:
 	set(value):

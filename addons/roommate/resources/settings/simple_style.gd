@@ -11,7 +11,7 @@
 class_name RoommateSimpleStyle
 extends RoommateStyle
 
-const _BLOCK_SELECTOR := preload("../data/style/blocks_selectors/blocks_selector.gd")
+const _BLOCK_SELECTOR := preload("../../data/style/blocks_selectors/blocks_selector.gd")
 
 @export var simple_rulesets: Array[RoommateSimpleRuleset] = []
 
