@@ -1,6 +1,6 @@
-[gd_resource type="Resource" load_steps=5 format=3]
+[gd_resource type="Resource" load_steps=5 format=3 uid="uid://cmgu7ic65pcpv"]
 
-[ext_resource type="Script" path="res://addons/roommate/resources/settings/default_setting_values.gd" id="1_s157l"]
+[ext_resource type="Script" path="res://addons/roommate/resources/settings/settings.gd" id="1_22pqf"]
 
 [sub_resource type="InputEventKey" id="InputEventKey_425sl"]
 device = -1
@@ -21,7 +21,7 @@ keycode = 87
 unicode = 119
 
 [resource]
-script = ExtResource("1_s157l")
+script = ExtResource("1_22pqf")
 settings = {
 "stid_area_block_range_step": 0.5,
 "stid_area_resize_snap": 1.0,
@@ -41,4 +41,22 @@ shortcuts = {
 "stid_clear_scenes_shortcut": SubResource("InputEventKey_425sl"),
 "stid_generate_root_nodes_shortcut": SubResource("InputEventKey_b6dc5"),
 "stid_snap_roots_areas_shortcut": SubResource("InputEventKey_7glht")
+}
+categories = {
+"stid_area_block_range_step": &"general",
+"stid_area_resize_snap": &"general",
+"stid_area_snap_margin": &"general",
+"stid_auto_snap_on_gizmo_edit": &"general",
+"stid_clear_scenes_shortcut": &"shortcuts",
+"stid_clear_settings_when_plugin_disabled": &"general",
+"stid_collision_shape_resource_file_postfix": &"names",
+"stid_generate_root_nodes_shortcut": &"shortcuts",
+"stid_mesh_container_name": &"names",
+"stid_mesh_resource_file_postfix": &"names",
+"stid_nav_mesh_resource_file_postfix": &"names",
+"stid_occluder_resource_file_postfix": &"names",
+"stid_scenes_fallback_parent_name": &"names",
+"stid_scenes_group": &"names",
+"stid_set_global_rotation_when_snapping": &"general",
+"stid_snap_roots_areas_shortcut": &"shortcuts"
 }

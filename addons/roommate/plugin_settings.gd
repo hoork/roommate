@@ -9,7 +9,8 @@
 @tool
 extends RefCounted
 
-const _DEFAULTS := preload("./defaults/default_setting_values.tres")
+const SETTINGS_PATH_TEMPLATE := "roommate/%s/%s"
+const _DEFAULTS := preload("./defaults/default_settings.tres")
 
 var _editor_settings: EditorSettings
 
@@ -41,11 +42,10 @@ static func get_or_default(setting_id: StringName) -> Variant:
 
 
 static func _get_path(settind_id: StringName) -> String:
-	const SETTINGS_PATH_TEMPLATE := "plugins/roommate/%s"
-	
 	if not settind_id.begins_with("stid_"):
 		push_error("ROOMMATE: Setting Id must start with stid_ prefix. Received '%s'." % settind_id)
-	return SETTINGS_PATH_TEMPLATE % settind_id.trim_prefix("stid_")
+	var category := _DEFAULTS.categories.get(settind_id, "misc") as String
+	return SETTINGS_PATH_TEMPLATE % [category, settind_id.trim_prefix("stid_")]
 
 
 func _init(plugin: EditorPlugin) -> void:

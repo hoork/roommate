@@ -11,3 +11,5 @@ extends Resource
 
 @export var settings: Dictionary
 @export var shortcuts: Dictionary
+
+@export var categories: Dictionary
