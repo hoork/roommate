@@ -235,7 +235,7 @@ func create_blocks() -> Dictionary:
 			var new_block := area_blocks[new_block_position] as RoommateBlock
 			if not new_block:
 				continue
-			if new_block.type_id == RoommateBlock.OUT_OF_BOUNDS_TYPE:
+			if new_block.marked_for_deletion:
 				all_blocks.erase(new_block_position)
 				continue
 			all_blocks[new_block_position] = new_block

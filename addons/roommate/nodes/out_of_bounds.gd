@@ -22,4 +22,5 @@ func get_type_order() -> float:
 
 func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlock:
 	new_block.type_id = RoommateBlock.OUT_OF_BOUNDS_TYPE
+	new_block.marked_for_deletion = true
 	return new_block

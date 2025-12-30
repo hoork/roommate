@@ -43,6 +43,8 @@ var slots := {}:
 			return
 		slots = value
 
+var marked_for_deletion := false
+
 var center: Vector3:
 	get: return (position as Vector3) + Vector3.ONE / 2
 
