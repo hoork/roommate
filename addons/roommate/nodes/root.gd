@@ -16,6 +16,12 @@ extends Node3D
 
 signal generated
 
+enum SettingBool { 
+	FROM_SETTINGS = -1, 
+	FALSE = 0, 
+	TRUE = 1, 
+}
+
 const MESH_SINGLE := &"mtid_single"
 
 const COLLISION_CONCAVE := &"csid_concave"
@@ -37,37 +43,40 @@ const _INTERNAL_STYLE := preload("../resources/styles/internal_style.gd")
 
 @export var scale_with_block_size := true
 @export var force_white_vertex_color := true
-@export var auto_create_resource_files := false
+@export var auto_create_resource_files := SettingBool.FROM_SETTINGS
 @export var generate_on_ready := false
 
 @export_group("Mesh")
 @export_enum(MESH_SINGLE) var mesh_type := String(MESH_SINGLE)
 @export_node_path("MeshInstance3D") var linked_mesh_container: NodePath
 @export_file("*.tres", "*.res") var path_to_mesh_resource: String
-@export var create_mesh_container_if_missing := true
+@export var create_mesh_container_if_missing := SettingBool.FROM_SETTINGS
 @export var index_mesh := true
-@export var generate_normals := true
+@export var generate_normals := false
 @export var generate_tangents := true
 
 @export_group("Collision")
 @export_enum(COLLISION_CONCAVE, COLLISION_CONVEX) var collision_shape := String(COLLISION_CONCAVE)
 @export_node_path("CollisionShape3D") var linked_collision_shape_container: NodePath
 @export_file("*.tres", "*.res") var path_to_collision_shape_resource: String
+@export var create_collision_container_if_missing := SettingBool.FROM_SETTINGS
 
 @export_group("Scenes")
 @export var transform_scene_relative_to_part := true
-@export var use_scenes_fallback_parent := true
+@export var use_scenes_fallback_parent := SettingBool.FROM_SETTINGS
 @export var force_readable_scene_names := true
 
 @export_group("Navigation")
 @export_enum(NAV_SINGLE) var nav_mesh_type := String(NAV_SINGLE)
 @export_node_path("NavigationRegion3D") var linked_nav_mesh_container: NodePath
 @export_file("*.tres", "*.res") var path_to_nav_mesh_resource: String
+@export var create_nav_mesh_container_if_missing := SettingBool.FROM_SETTINGS
 
 @export_group("Occlusion")
 @export_enum(OCCLUDER_SINGLE) var occluder_type := String(OCCLUDER_SINGLE)
 @export_node_path("OccluderInstance3D") var linked_occluder_container: NodePath
 @export_file("*.tres", "*.res", "*.occ") var path_to_occluder_resource: String
+@export var create_occluder_container_if_missing := SettingBool.FROM_SETTINGS
 
 var _part_processors := {
 	RoommateBlock.SPACE_TYPE: _process_space_block_part,
@@ -119,7 +128,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 			push_error("ROOMMATE: Unknown mesh type id %s." % mesh_type)
 	
 	# applying collision
-	var collision_shape_container := get_node_or_null(linked_collision_shape_container) as CollisionShape3D
+	var collision_shape_container := _resolve_collision_shape_container()
 	if collision_shape_container:
 		var new_shape: Shape3D
 		match StringName(collision_shape):
@@ -174,7 +183,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 					new_scene.set(property_name, property_overrides[property_name])
 	
 	# applying navigation
-	var nav_mesh_container := get_node_or_null(linked_nav_mesh_container) as NavigationRegion3D
+	var nav_mesh_container := _resolve_nav_mesh_container()
 	if nav_mesh_container:
 		match StringName(nav_mesh_type):
 			NAV_SINGLE:
@@ -192,7 +201,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 				push_error("ROOMMATE: Unknown nav mesh type id %s." % nav_mesh_type)
 	
 	# applying occluder
-	var occluder_container := get_node_or_null(linked_occluder_container) as OccluderInstance3D
+	var occluder_container := _resolve_occluder_container()
 	if occluder_container:
 		match StringName(occluder_type):
 			OCCLUDER_SINGLE:
@@ -432,12 +441,32 @@ func _resolve_mesh_container() -> Node3D:
 			push_error("ROOMMATE: Wrong type of mesh container. MeshInstance3D expected.")
 			return null
 		return container
-	if create_mesh_container_if_missing:
+	if _resolve_setting_bool(&"stid_create_mesh_container_if_missing", create_mesh_container_if_missing):
 		container = MeshInstance3D.new() if mesh_type == MESH_SINGLE else Node3D.new()
 		container.name = _SETTINGS.get_string(&"stid_mesh_container_name")
 		add_child(container)
 		container.owner = owner
 		linked_mesh_container = get_path_to(container)
+	return container
+
+
+func _resolve_collision_shape_container() -> CollisionShape3D:
+	var container := get_node_or_null(linked_collision_shape_container) as CollisionShape3D
+	if container:
+		return container
+	if _resolve_setting_bool(&"stid_create_collision_shape_container_if_missing", create_collision_container_if_missing):
+		var static_body := StaticBody3D.new()
+		static_body.name = _SETTINGS.get_string(&"stid_collision_static_body_name")
+		
+		container = CollisionShape3D.new()
+		container.name = _SETTINGS.get_string(&"stid_collision_shape_container_name")
+		
+		add_child(static_body)
+		static_body.add_child(container)
+		
+		static_body.owner = owner
+		container.owner = owner
+		linked_collision_shape_container = get_path_to(container)
 	return container
 
 
@@ -450,7 +479,7 @@ func _resolve_scene_parent(parent_path: NodePath) -> Node:
 	
 	if scene_parent:
 		return scene_parent
-	elif not use_scenes_fallback_parent:
+	elif not _resolve_setting_bool(&"stid_use_scenes_fallback_parent", use_scenes_fallback_parent):
 		return null
 	
 	var fallback_name := _SETTINGS.get_string(&"stid_scenes_fallback_parent_name")
@@ -464,9 +493,35 @@ func _resolve_scene_parent(parent_path: NodePath) -> Node:
 	return fallback
 
 
+func _resolve_nav_mesh_container() -> NavigationRegion3D:
+	var container := get_node_or_null(linked_nav_mesh_container) as NavigationRegion3D
+	if container:
+		return container
+	if _resolve_setting_bool(&"stid_create_nav_mesh_container_if_missing", create_nav_mesh_container_if_missing):
+		container = NavigationRegion3D.new()
+		container.name = _SETTINGS.get_string(&"stid_nav_mesh_container_name")
+		add_child(container)
+		container.owner = owner
+		linked_nav_mesh_container = get_path_to(container)
+	return container
+
+
+func _resolve_occluder_container() -> OccluderInstance3D:
+	var container := get_node_or_null(linked_occluder_container) as OccluderInstance3D
+	if container:
+		return container
+	if _resolve_setting_bool(&"stid_create_occluder_container_if_missing", create_occluder_container_if_missing):
+		container = OccluderInstance3D.new()
+		container.name = _SETTINGS.get_string(&"stid_occluder_container_name")
+		add_child(container)
+		container.owner = owner
+		linked_occluder_container = get_path_to(container)
+	return container
+
+
 func _try_save_resource(new_resource: Resource, path_to_resource: String, postfix_setting: StringName) -> bool:
 	var path := path_to_resource
-	var auto_creation_requested := auto_create_resource_files and path.is_empty()
+	var auto_creation_requested := _resolve_setting_bool(&"stid_auto_create_resource_files", auto_create_resource_files) and path.is_empty()
 	if auto_creation_requested:
 		if not is_inside_tree():
 			push_error("ROOMMATE: RoommateRoot must be inside tree when saving resource.")
@@ -483,6 +538,12 @@ func _try_save_resource(new_resource: Resource, path_to_resource: String, postfi
 		new_resource.take_over_path(path)
 		return true
 	return false
+
+
+func _resolve_setting_bool(setting_id: StringName, value: SettingBool) -> bool:
+	if value == SettingBool.FROM_SETTINGS:
+		return _SETTINGS.get_bool(setting_id)
+	return value == SettingBool.TRUE
 
 
 func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
