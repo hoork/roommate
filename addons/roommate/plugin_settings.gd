@@ -23,8 +23,12 @@ static func get_float(setting_id: StringName) -> float:
 	return get_or_default(setting_id) as float
 
 
-static func get_string(setting_id: StringName) -> StringName:
+static func get_string_name(setting_id: StringName) -> StringName:
 	return get_or_default(setting_id) as StringName
+
+
+static func get_string(setting_id: StringName) -> String:
+	return get_or_default(setting_id) as String
 
 
 static func get_or_default(setting_id: StringName) -> Variant:
@@ -53,7 +57,6 @@ func _init(plugin: EditorPlugin) -> void:
 
 
 func init_settings() -> void:
-	clear()
 	for setting_id in _DEFAULTS.shortcuts:
 		var shortcut_path := _get_path(setting_id)
 		var default_shortcut := Shortcut.new()
@@ -68,8 +71,13 @@ func init_settings() -> void:
 		var default_value: Variant = _DEFAULTS.settings[setting_id]
 		if ProjectSettings.has_setting(setting_path):
 			continue
+		
 		ProjectSettings.set_setting(setting_path, default_value)
 		ProjectSettings.set_initial_value(setting_path, default_value)
+		if _DEFAULTS.property_infos.has(setting_id):
+			var info := _DEFAULTS.property_infos[setting_id].duplicate(true) as Dictionary
+			info[&"name"] = setting_path
+			ProjectSettings.add_property_info(info)
 
 
 func get_shortcut(setting_id: StringName) -> Shortcut:

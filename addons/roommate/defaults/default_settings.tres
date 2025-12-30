@@ -36,6 +36,7 @@ settings = {
 "stid_create_mesh_container_if_missing": true,
 "stid_create_nav_mesh_container_if_missing": false,
 "stid_create_occluder_container_if_missing": false,
+"stid_global_style": "",
 "stid_mesh_container_name": &"RoommateMeshContainer",
 "stid_mesh_resource_file_postfix": "_mesh.tres",
 "stid_nav_mesh_container_name": &"RoommateNavMeshContainer",
@@ -63,12 +64,12 @@ categories = {
 "stid_collision_shape_container_name": &"names",
 "stid_collision_shape_resource_file_postfix": &"names",
 "stid_collision_static_body_name": &"names",
-"stid_create_collision_container_if_missing": &"auto_create",
 "stid_create_collision_shape_container_if_missing": &"auto_create",
 "stid_create_mesh_container_if_missing": &"auto_create",
 "stid_create_nav_mesh_container_if_missing": &"auto_create",
 "stid_create_occluder_container_if_missing": &"auto_create",
 "stid_generate_root_nodes_shortcut": &"shortcuts",
+"stid_global_style": &"general",
 "stid_mesh_container_name": &"names",
 "stid_mesh_resource_file_postfix": &"names",
 "stid_nav_mesh_container_name": &"names",
@@ -80,4 +81,11 @@ categories = {
 "stid_set_global_rotation_when_snapping": &"general",
 "stid_snap_roots_areas_shortcut": &"shortcuts",
 "stid_use_scenes_fallback_parent": &"auto_create"
+}
+property_infos = {
+"stid_global_style": {
+"hint": 13,
+"hint_string": "*.tres,*.res",
+"type": 4
+}
 }

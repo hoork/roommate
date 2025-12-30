@@ -172,7 +172,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 			var property_overrides := staged_scene_item[&"property_overrides"] as Dictionary
 			scene_parent.add_child(new_scene, force_readable_scene_names)
 			new_scene.owner = owner
-			new_scene.add_to_group(_SETTINGS.get_string(&"stid_scenes_group"), true)
+			new_scene.add_to_group(_SETTINGS.get_string_name(&"stid_scenes_group"), true)
 			
 			var node3d_scene := new_scene as Node3D
 			if node3d_scene and transform_scene_relative_to_part:
@@ -256,6 +256,14 @@ func create_blocks() -> Dictionary:
 	internal_style.force_white_vertex_color = force_white_vertex_color
 	internal_style.apply(all_blocks)
 	
+	# Applying global style
+	var global_style_path := _SETTINGS.get_string(&"stid_global_style")
+	if ResourceLoader.exists(global_style_path):
+		var global_style := load(String(global_style_path)) as RoommateStyle
+		print(global_style)
+		if global_style:
+			global_style.apply(all_blocks)
+	
 	# Applying stylers
 	var stylers := get_owned_stylers()
 	var sort_stylers := func (a: RoommateStyler, b: RoommateStyler) -> bool:
@@ -316,7 +324,7 @@ func get_owned_scenes() -> Array[Node]:
 	if not is_inside_tree():
 		push_warning("ROOMMATE: RoommateRoot must be inside tree when getting owned scenes.")
 		return []
-	var all_scenes := get_tree().get_nodes_in_group(_SETTINGS.get_string(&"stid_scenes_group"))
+	var all_scenes := get_tree().get_nodes_in_group(_SETTINGS.get_string_name(&"stid_scenes_group"))
 	var child_roots := find_children("*", &"RoommateRoot", true, false)
 	var filter_by_parents_and_self := func (target: Node) -> bool:
 		if not is_ancestor_of(target):
@@ -443,7 +451,7 @@ func _resolve_mesh_container() -> Node3D:
 		return container
 	if _resolve_setting_bool(&"stid_create_mesh_container_if_missing", create_mesh_container_if_missing):
 		container = MeshInstance3D.new() if mesh_type == MESH_SINGLE else Node3D.new()
-		container.name = _SETTINGS.get_string(&"stid_mesh_container_name")
+		container.name = _SETTINGS.get_string_name(&"stid_mesh_container_name")
 		add_child(container)
 		container.owner = owner
 		linked_mesh_container = get_path_to(container)
@@ -456,10 +464,10 @@ func _resolve_collision_shape_container() -> CollisionShape3D:
 		return container
 	if _resolve_setting_bool(&"stid_create_collision_shape_container_if_missing", create_collision_container_if_missing):
 		var static_body := StaticBody3D.new()
-		static_body.name = _SETTINGS.get_string(&"stid_collision_static_body_name")
+		static_body.name = _SETTINGS.get_string_name(&"stid_collision_static_body_name")
 		
 		container = CollisionShape3D.new()
-		container.name = _SETTINGS.get_string(&"stid_collision_shape_container_name")
+		container.name = _SETTINGS.get_string_name(&"stid_collision_shape_container_name")
 		
 		add_child(static_body)
 		static_body.add_child(container)
@@ -482,14 +490,14 @@ func _resolve_scene_parent(parent_path: NodePath) -> Node:
 	elif not _resolve_setting_bool(&"stid_use_scenes_fallback_parent", use_scenes_fallback_parent):
 		return null
 	
-	var fallback_name := _SETTINGS.get_string(&"stid_scenes_fallback_parent_name")
+	var fallback_name := _SETTINGS.get_string_name(&"stid_scenes_fallback_parent_name")
 	var fallback := get_node_or_null(NodePath(fallback_name))
 	if not fallback:
 		fallback = Node3D.new()
 		fallback.name = fallback_name
 		add_child(fallback)
 		fallback.owner = owner
-		fallback.add_to_group(_SETTINGS.get_string(&"stid_scenes_group"), true)
+		fallback.add_to_group(_SETTINGS.get_string_name(&"stid_scenes_group"), true)
 	return fallback
 
 
@@ -499,7 +507,7 @@ func _resolve_nav_mesh_container() -> NavigationRegion3D:
 		return container
 	if _resolve_setting_bool(&"stid_create_nav_mesh_container_if_missing", create_nav_mesh_container_if_missing):
 		container = NavigationRegion3D.new()
-		container.name = _SETTINGS.get_string(&"stid_nav_mesh_container_name")
+		container.name = _SETTINGS.get_string_name(&"stid_nav_mesh_container_name")
 		add_child(container)
 		container.owner = owner
 		linked_nav_mesh_container = get_path_to(container)
@@ -512,7 +520,7 @@ func _resolve_occluder_container() -> OccluderInstance3D:
 		return container
 	if _resolve_setting_bool(&"stid_create_occluder_container_if_missing", create_occluder_container_if_missing):
 		container = OccluderInstance3D.new()
-		container.name = _SETTINGS.get_string(&"stid_occluder_container_name")
+		container.name = _SETTINGS.get_string_name(&"stid_occluder_container_name")
 		add_child(container)
 		container.owner = owner
 		linked_occluder_container = get_path_to(container)
