@@ -49,7 +49,7 @@ var center: Vector3:
 var _read_only := false
 
 
-static func raycast(start: Vector3i, step: Vector3i, source_blocks: Dictionary) -> int:
+static func stepcast(start: Vector3i, step: Vector3i, source_blocks: Dictionary) -> int:
 	var result := 0
 	var block := source_blocks.get(start + step) as RoommateBlock
 	while block:
