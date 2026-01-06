@@ -7,11 +7,11 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
-@icon("../icons/style.svg")
+@icon("../../icons/style.svg")
 class_name RoommateSimpleStyle
 extends RoommateStyle
 
-const _BLOCK_SELECTOR := preload("../../data/style/blocks_selectors/blocks_selector.gd")
+const _BLOCK_SELECTOR := preload("../../style_system/blocks_selectors/blocks_selector.gd")
 
 @export var simple_rulesets: Array[RoommateSimpleRuleset] = []
 

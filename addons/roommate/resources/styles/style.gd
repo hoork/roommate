@@ -18,7 +18,7 @@ extends Resource
 ## [br][br]
 ## It can be used in [RoommateRoot], [RoommateBlocksArea] and it's derived classes.
 
-const _RULESET := preload("../../data/style/ruleset.gd")
+const _RULESET := preload("../../style_system/ruleset.gd")
 
 var _current_rulesets: Array[_RULESET] = []
 
