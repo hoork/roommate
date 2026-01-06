@@ -27,12 +27,24 @@ const MESH_SINGLE := &"mtid_single"
 const COLLISION_CONCAVE := &"csid_concave"
 const COLLISION_CONVEX := &"csid_convex"
 
+const SCENES_ALL := &"stid_scenes"
+
 const NAV_SINGLE := &"nmtid_single"
 
 const OCCLUDER_SINGLE := &"otid_single"
 
 const _SETTINGS := preload("../plugin_settings.gd")
 const _INTERNAL_STYLE := preload("../resources/styles/internal_style.gd")
+
+const _ASSEMBLER := preload("./root_assemblers/assembler.gd")
+const _ASSEMBLERS := {
+	MESH_SINGLE: preload("./root_assemblers/mesh_single_assembler.gd"),
+	COLLISION_CONCAVE: preload("./root_assemblers/collision_single_concave_assembler.gd"),
+	COLLISION_CONVEX: preload("./root_assemblers/collision_single_convex_assembler.gd"),
+	SCENES_ALL: preload("./root_assemblers/scenes_all_assembler.gd"),
+	NAV_SINGLE: preload("./root_assemblers/nav_single_assembler.gd"),
+	OCCLUDER_SINGLE: preload("./root_assemblers/occluder_single_assembler.gd"),
+}
 
 @export var block_size := 1.0:
 	set(value):
@@ -62,6 +74,7 @@ const _INTERNAL_STYLE := preload("../resources/styles/internal_style.gd")
 @export var create_collision_container_if_missing := SettingBool.FROM_SETTINGS
 
 @export_group("Scenes")
+@export_enum(SCENES_ALL) var scenes_type := String(SCENES_ALL)
 @export var transform_scene_relative_to_part := true
 @export var use_scenes_fallback_parent := SettingBool.FROM_SETTINGS
 @export var force_readable_scene_names := true
@@ -85,6 +98,12 @@ var _part_processors := {
 }
 
 
+static func resolve_setting_bool(setting_id: StringName, value: SettingBool) -> bool:
+	if value == SettingBool.FROM_SETTINGS:
+		return _SETTINGS.get_bool(setting_id)
+	return value == SettingBool.TRUE
+
+
 func _ready() -> void:
 	if not Engine.is_editor_hint() and generate_on_ready:
 		generate()
@@ -99,12 +118,14 @@ func generate_with(all_blocks: Dictionary) -> void:
 	if all_blocks.is_empty():
 		return
 	
-	# creating collections
-	var surface_tools := {}
-	var collision_faces := PackedVector3Array()
-	var staged_scenes := {}
-	var nav_tool := SurfaceTool.new()
-	var occluder_tool := SurfaceTool.new()
+	var assemblers: Array[_ASSEMBLER] = []
+	for type in [mesh_type, collision_shape, scenes_type, nav_mesh_type, occluder_type]:
+		if not _ASSEMBLERS.has(type):
+			continue
+		var assembler: _ASSEMBLER = _ASSEMBLERS[type].new()
+		assembler.block_size = block_size
+		assembler.root_node_path = get_path()
+		assemblers.append(assembler)
 	
 	# generating everything
 	for block_position in all_blocks:
@@ -117,107 +138,11 @@ func generate_with(all_blocks: Dictionary) -> void:
 			var part := block.slots.get(slot_id) as RoommatePart
 			var processed_part := processor.call(slot_id, part, block, all_blocks) as RoommatePart
 			if processed_part:
-				_generate_part(processed_part, block, surface_tools, 
-						collision_faces, staged_scenes, nav_tool, occluder_tool)
+				for assembler in assemblers:
+					assembler.add_part(processed_part, block)
 	
-	# applying mesh
-	match StringName(mesh_type):
-		MESH_SINGLE:
-			_generate_single_mesh(surface_tools)
-		_:
-			push_error("ROOMMATE: Unknown mesh type id %s." % mesh_type)
-	
-	# applying collision
-	var collision_shape_container := _resolve_collision_shape_container()
-	if collision_shape_container:
-		var new_shape: Shape3D
-		match StringName(collision_shape):
-			COLLISION_CONCAVE:
-				var concave := ConcavePolygonShape3D.new()
-				if collision_shape_container.shape is ConcavePolygonShape3D:
-					concave = collision_shape_container.shape.duplicate(true) as ConcavePolygonShape3D
-				concave.set_faces(collision_faces)
-				new_shape = concave
-			COLLISION_CONVEX:
-				var convex := ConvexPolygonShape3D.new()
-				if collision_shape_container.shape is ConvexPolygonShape3D:
-					convex = collision_shape_container.shape.duplicate(true) as ConvexPolygonShape3D
-				convex.points = collision_faces.duplicate()
-				new_shape = convex
-			_:
-				push_error("ROOMMATE: Unknown collision shape id %s." % collision_shape)
-		if _try_save_resource(new_shape, path_to_collision_shape_resource, &"stid_collision_shape_resource_file_postfix"):
-			path_to_collision_shape_resource = new_shape.resource_path
-		collision_shape_container.shape = new_shape
-	
-	#applying scenes
-	clear_scenes()
-	var scene_paths: Array[NodePath] = []
-	scene_paths.assign(staged_scenes.keys())
-	# creating scenes starting from least nested to most nested
-	var sort_by_node_path := func(a: NodePath, b: NodePath) -> bool:
-		return a.get_name_count() < b.get_name_count()
-	scene_paths.sort_custom(sort_by_node_path)
-	for scene_path in scene_paths:
-		var staged_scene_items := staged_scenes[scene_path] as Array[Dictionary]
-		var scene_parent := _resolve_scene_parent(scene_path)
-		if not scene_parent:
-			for staged_scene_item in staged_scene_items:
-				var new_scene := staged_scene_item[&"scene"] as Node
-				new_scene.queue_free()
-			continue
-		
-		for staged_scene_item in staged_scene_items:
-			var new_scene := staged_scene_item[&"scene"] as Node
-			var property_overrides := staged_scene_item[&"property_overrides"] as Dictionary
-			scene_parent.add_child(new_scene, force_readable_scene_names)
-			new_scene.owner = owner
-			new_scene.add_to_group(_SETTINGS.get_string_name(&"stid_scenes_group"), true)
-			
-			var node3d_scene := new_scene as Node3D
-			if node3d_scene and transform_scene_relative_to_part:
-				node3d_scene.global_transform = global_transform * node3d_scene.transform
-			for key in property_overrides:
-				if key is String or key is StringName:
-					var property_name := key as StringName
-					new_scene.set(property_name, property_overrides[property_name])
-	
-	# applying navigation
-	var nav_mesh_container := _resolve_nav_mesh_container()
-	if nav_mesh_container:
-		match StringName(nav_mesh_type):
-			NAV_SINGLE:
-				nav_tool.index()
-				var new_nav_mesh := NavigationMesh.new()
-				if nav_mesh_container.navigation_mesh:
-					new_nav_mesh = nav_mesh_container.navigation_mesh.duplicate(true) as NavigationMesh
-				new_nav_mesh.create_from_mesh(nav_tool.commit())
-				
-				if _try_save_resource(new_nav_mesh, path_to_nav_mesh_resource, &"stid_nav_mesh_resource_file_postfix"):
-					path_to_nav_mesh_resource = new_nav_mesh.resource_path
-				nav_mesh_container.navigation_mesh = new_nav_mesh
-				nav_mesh_container.update_gizmos()
-			_:
-				push_error("ROOMMATE: Unknown nav mesh type id %s." % nav_mesh_type)
-	
-	# applying occluder
-	var occluder_container := _resolve_occluder_container()
-	if occluder_container:
-		match StringName(occluder_type):
-			OCCLUDER_SINGLE:
-				occluder_tool.index()
-				var occluder := ArrayOccluder3D.new()
-				var occluder_arrays := occluder_tool.commit_to_arrays()
-				var vertices := PackedVector3Array(occluder_arrays[Mesh.ARRAY_VERTEX])
-				var indices := PackedInt32Array(occluder_arrays[Mesh.ARRAY_INDEX])
-				occluder.set_arrays(vertices, indices)
-				
-				if _try_save_resource(occluder, path_to_occluder_resource, &"stid_occluder_resource_file_postfix"):
-					path_to_occluder_resource = occluder.resource_path
-				occluder_container.occluder = occluder
-				occluder_container.update_gizmos()
-			_:
-				push_error("ROOMMATE: Unknown occluder type id %s." % occluder_type)
+	for assembler in assemblers:
+		assembler.assemble_and_attach(self)
 	
 	if not Engine.is_editor_hint():
 		generated.emit()
@@ -336,200 +261,9 @@ func get_owned_scenes() -> Array[Node]:
 	return all_scenes.filter(filter_by_parents_and_self) as Array[Node]
 
 
-func _generate_part(part: RoommatePart, parent_block: RoommateBlock, 
-		surface_tools: Dictionary, collision_faces: PackedVector3Array,
-		staged_scenes: Dictionary, nav_tool: SurfaceTool, 
-		occluder_tool: SurfaceTool) -> void:
-	if not part:
-		return
-	var part_origin := parent_block.position * block_size + block_size * part.anchor
-	
-	if part.collision_mesh:
-		var part_collision_faces := part.collision_transform.translated(part_origin) * part.collision_mesh.get_faces()
-		collision_faces.append_array(part_collision_faces)
-	
-	if part.scene:
-		var new_scene := part.scene.instantiate() as Node
-		var node3d_scene := new_scene as Node3D
-		if node3d_scene:
-			node3d_scene.transform = part.scene_transform.translated(part_origin)
-		
-		var parent_path := part.scene_parent_path
-		if not parent_path.is_absolute() and not parent_path.is_empty():
-			parent_path = NodePath(("%s/%s" % [get_path(), part.scene_parent_path]).simplify_path())
-		
-		if not staged_scenes.has(parent_path):
-			var new_scenes_array: Array[Dictionary] = []
-			staged_scenes[parent_path] = new_scenes_array
-		staged_scenes[parent_path].append({
-			&"scene": new_scene,
-			&"property_overrides": part.scene_property_overrides,
-		})
-	
-	if part.nav_mesh:
-		for surface_id in part.nav_mesh.get_surface_count():
-			nav_tool.append_from(part.nav_mesh, surface_id, part.nav_transform.translated(part_origin))
-	
-	if part.occluder_mesh:
-		for surface_id in part.occluder_mesh.get_surface_count():
-			occluder_tool.append_from(part.occluder_mesh, surface_id, 
-					part.occluder_transform.translated(part_origin))
-	
-	if not part.mesh:
-		return
-	for surface_id in part.mesh.get_surface_count():
-		var part_surface_override := part.resolve_surface_override_with_fallback(surface_id)
-		
-		# modifying mesh
-		var part_mesh := ArrayMesh.new()
-		var mesh_arrays := part.mesh.surface_get_arrays(surface_id)
-		if part_surface_override.flip_faces:
-			if mesh_arrays[Mesh.ARRAY_INDEX] and mesh_arrays[Mesh.ARRAY_INDEX].size() > 0:
-				mesh_arrays[Mesh.ARRAY_INDEX].reverse()
-			else:
-				push_warning("ROOMMATE: Can't flip faces. Mesh array doesn't have indexes.")
-		part_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_arrays)
-		var mesh_data_tool := MeshDataTool.new()
-		var create_error := mesh_data_tool.create_from_surface(part_mesh, 0)
-		if create_error != OK:
-			push_error("ROOMMATE: Can't create MeshDataTool from surface. Error %s." % create_error)
-		
-		for vertex_id in mesh_data_tool.get_vertex_count():
-			var uv := mesh_data_tool.get_vertex_uv(vertex_id)
-			mesh_data_tool.set_vertex_uv(vertex_id, part_surface_override.uv_transform * uv)
-			var color := mesh_data_tool.get_vertex_color(vertex_id)
-			mesh_data_tool.set_vertex_color(vertex_id, color.lerp(part_surface_override.color, part_surface_override.color_weight))
-		
-		part_mesh.clear_surfaces()
-		var commit_error := mesh_data_tool.commit_to_surface(part_mesh)
-		if commit_error != OK:
-			push_error("ROOMMATE: MeshDataTool can't commit to surface. Error %s." % commit_error)
-		
-		# appending surfaces
-		var part_material := part.mesh.surface_get_material(surface_id)
-		if part_surface_override.material:
-			part_material = part_surface_override.material
-			
-		if not surface_tools.has(part_material):
-			var new_surface_tool := SurfaceTool.new()
-			new_surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-			new_surface_tool.set_material(part_material)
-			surface_tools[part_material] = new_surface_tool
-		var surface_tool := surface_tools[part_material] as SurfaceTool
-		surface_tool.append_from(part_mesh, 0, part.mesh_transform.translated(part_origin))
-
-
-func _generate_single_mesh(surface_tools: Dictionary) -> void:
-	var container := _resolve_mesh_container() as MeshInstance3D
-	if not container:
-		return
-	var new_mesh := ArrayMesh.new()
-	if container.mesh is ArrayMesh:
-		new_mesh = container.mesh.duplicate(true) as ArrayMesh
-		new_mesh.clear_surfaces()
-	for surface_material in surface_tools:
-		var tool := surface_tools[surface_material] as SurfaceTool
-		if index_mesh:
-			tool.index()
-		if generate_normals:
-			tool.generate_normals()
-		if generate_tangents:
-			tool.generate_tangents()
-		tool.commit(new_mesh)
-		new_mesh.surface_set_material(new_mesh.get_surface_count() - 1, surface_material)
-	if _try_save_resource(new_mesh, path_to_mesh_resource, &"stid_mesh_resource_file_postfix"):
-		path_to_mesh_resource = new_mesh.resource_path
-	container.mesh = new_mesh
-
-
-func _resolve_mesh_container() -> Node3D:
-	var container := get_node_or_null(linked_mesh_container) as Node3D
-	if container:
-		if mesh_type == MESH_SINGLE and not container is MeshInstance3D:
-			push_error("ROOMMATE: Wrong type of mesh container. MeshInstance3D expected.")
-			return null
-		return container
-	if _resolve_setting_bool(&"stid_create_mesh_container_if_missing", create_mesh_container_if_missing):
-		container = MeshInstance3D.new() if mesh_type == MESH_SINGLE else Node3D.new()
-		container.name = _SETTINGS.get_string_name(&"stid_mesh_container_name")
-		add_child(container)
-		container.owner = owner
-		linked_mesh_container = get_path_to(container)
-	return container
-
-
-func _resolve_collision_shape_container() -> CollisionShape3D:
-	var container := get_node_or_null(linked_collision_shape_container) as CollisionShape3D
-	if container:
-		return container
-	if _resolve_setting_bool(&"stid_create_collision_shape_container_if_missing", create_collision_container_if_missing):
-		var static_body := StaticBody3D.new()
-		static_body.name = _SETTINGS.get_string_name(&"stid_collision_static_body_name")
-		
-		container = CollisionShape3D.new()
-		container.name = _SETTINGS.get_string_name(&"stid_collision_shape_container_name")
-		
-		add_child(static_body)
-		static_body.add_child(container)
-		
-		static_body.owner = owner
-		container.owner = owner
-		linked_collision_shape_container = get_path_to(container)
-	return container
-
-
-func _resolve_scene_parent(parent_path: NodePath) -> Node:
-	var scene_parent := get_node_or_null(parent_path)
-	if parent_path.is_empty():
-		push_warning("ROOMMATE: Scene creation. Path is empty.")
-	elif not scene_parent:
-		push_warning("ROOMMATE: Scene creation. Parent doesn't exist at %s." % parent_path)
-	
-	if scene_parent:
-		return scene_parent
-	elif not _resolve_setting_bool(&"stid_use_scenes_fallback_parent", use_scenes_fallback_parent):
-		return null
-	
-	var fallback_name := _SETTINGS.get_string_name(&"stid_scenes_fallback_parent_name")
-	var fallback := get_node_or_null(NodePath(fallback_name))
-	if not fallback:
-		fallback = Node3D.new()
-		fallback.name = fallback_name
-		add_child(fallback)
-		fallback.owner = owner
-		fallback.add_to_group(_SETTINGS.get_string_name(&"stid_scenes_group"), true)
-	return fallback
-
-
-func _resolve_nav_mesh_container() -> NavigationRegion3D:
-	var container := get_node_or_null(linked_nav_mesh_container) as NavigationRegion3D
-	if container:
-		return container
-	if _resolve_setting_bool(&"stid_create_nav_mesh_container_if_missing", create_nav_mesh_container_if_missing):
-		container = NavigationRegion3D.new()
-		container.name = _SETTINGS.get_string_name(&"stid_nav_mesh_container_name")
-		add_child(container)
-		container.owner = owner
-		linked_nav_mesh_container = get_path_to(container)
-	return container
-
-
-func _resolve_occluder_container() -> OccluderInstance3D:
-	var container := get_node_or_null(linked_occluder_container) as OccluderInstance3D
-	if container:
-		return container
-	if _resolve_setting_bool(&"stid_create_occluder_container_if_missing", create_occluder_container_if_missing):
-		container = OccluderInstance3D.new()
-		container.name = _SETTINGS.get_string_name(&"stid_occluder_container_name")
-		add_child(container)
-		container.owner = owner
-		linked_occluder_container = get_path_to(container)
-	return container
-
-
-func _try_save_resource(new_resource: Resource, path_to_resource: String, postfix_setting: StringName) -> bool:
+func try_save_resource(new_resource: Resource, path_to_resource: String, postfix_setting: StringName) -> bool:
 	var path := path_to_resource
-	var auto_creation_requested := _resolve_setting_bool(&"stid_auto_create_resource_files", auto_create_resource_files) and path.is_empty()
+	var auto_creation_requested := resolve_setting_bool(&"stid_auto_create_resource_files", auto_create_resource_files) and path.is_empty()
 	if auto_creation_requested:
 		if not is_inside_tree():
 			push_error("ROOMMATE: RoommateRoot must be inside tree when saving resource.")
@@ -546,12 +280,6 @@ func _try_save_resource(new_resource: Resource, path_to_resource: String, postfi
 		new_resource.take_over_path(path)
 		return true
 	return false
-
-
-func _resolve_setting_bool(setting_id: StringName, value: SettingBool) -> bool:
-	if value == SettingBool.FROM_SETTINGS:
-		return _SETTINGS.get_bool(setting_id)
-	return value == SettingBool.TRUE
 
 
 func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
