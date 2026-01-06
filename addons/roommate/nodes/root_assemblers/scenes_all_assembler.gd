@@ -12,11 +12,11 @@ extends "./assembler.gd"
 var _staged_scenes := {}
 
 
-func add_part(part: RoommatePart, block: RoommateBlock) -> void:
+func add_part(part: RoommatePart, block: RoommateBlock, root: RoommateRoot) -> void:
 	if not part or not part.scene:
 		return
 	
-	var part_origin := block.position * block_size + block_size * part.anchor
+	var part_origin := block.position * root.block_size + root.block_size * part.anchor
 	var new_scene := part.scene.instantiate() as Node
 	var node3d_scene := new_scene as Node3D
 	if node3d_scene:
@@ -24,7 +24,7 @@ func add_part(part: RoommatePart, block: RoommateBlock) -> void:
 	
 	var parent_path := part.scene_parent_path
 	if not parent_path.is_absolute() and not parent_path.is_empty():
-		parent_path = NodePath(("%s/%s" % [root_node_path, part.scene_parent_path]).simplify_path())
+		parent_path = NodePath(("%s/%s" % [root.get_path(), part.scene_parent_path]).simplify_path())
 	
 	if not _staged_scenes.has(parent_path):
 		var new_scenes_array: Array[StagedScene] = []

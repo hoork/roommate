@@ -11,11 +11,8 @@ extends RefCounted
 
 const _SETTINGS := preload("../../plugin_settings.gd")
 
-var block_size := 0.0
-var root_node_path := NodePath()
 
-
-func add_part(part: RoommatePart, block: RoommateBlock) -> void:
+func add_part(part: RoommatePart, block: RoommateBlock, root: RoommateRoot) -> void:
 	pass
 
 

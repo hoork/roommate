@@ -12,10 +12,10 @@ extends "./assembler.gd"
 var _nav_tool := SurfaceTool.new()
 
 
-func add_part(part: RoommatePart, block: RoommateBlock) -> void:
+func add_part(part: RoommatePart, block: RoommateBlock, root: RoommateRoot) -> void:
 	if not part or not part.nav_mesh:
 		return
-	var part_origin := block.position * block_size + block_size * part.anchor
+	var part_origin := block.position * root.block_size + root.block_size * part.anchor
 	for surface_id in part.nav_mesh.get_surface_count():
 		_nav_tool.append_from(part.nav_mesh, surface_id, part.nav_transform.translated(part_origin))
 

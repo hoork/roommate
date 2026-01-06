@@ -148,8 +148,6 @@ func generate_with(all_blocks: Dictionary) -> void:
 		if not _ASSEMBLERS.has(type):
 			continue
 		var assembler: _ASSEMBLER = _ASSEMBLERS[type].new()
-		assembler.block_size = block_size
-		assembler.root_node_path = get_path()
 		assemblers.append(assembler)
 	
 	# generating everything
@@ -164,7 +162,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 			var processed_part := processor.call(slot_id, part, block, all_blocks) as RoommatePart
 			if processed_part:
 				for assembler in assemblers:
-					assembler.add_part(processed_part, block)
+					assembler.add_part(processed_part, block, self)
 	
 	for assembler in assemblers:
 		assembler.assemble_and_attach(self)

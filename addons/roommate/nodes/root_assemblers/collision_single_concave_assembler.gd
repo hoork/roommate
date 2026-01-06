@@ -12,10 +12,10 @@ extends "./assembler.gd"
 var _collision_faces := PackedVector3Array()
 
 
-func add_part(part: RoommatePart, block: RoommateBlock) -> void:
+func add_part(part: RoommatePart, block: RoommateBlock, root: RoommateRoot) -> void:
 	if not part or not part.collision_mesh:
 		return
-	var part_origin := block.position * block_size + block_size * part.anchor
+	var part_origin := block.position * root.block_size + root.block_size * part.anchor
 	var part_collision_faces := part.collision_transform.translated(part_origin) * part.collision_mesh.get_faces()
 	_collision_faces.append_array(part_collision_faces)
 

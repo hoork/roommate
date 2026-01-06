@@ -12,10 +12,10 @@ extends "./assembler.gd"
 var _occluder_tool := SurfaceTool.new()
 
 
-func add_part(part: RoommatePart, block: RoommateBlock) -> void:
+func add_part(part: RoommatePart, block: RoommateBlock, root: RoommateRoot) -> void:
 	if not part or not part.occluder_mesh:
 		return
-	var part_origin := block.position * block_size + block_size * part.anchor
+	var part_origin := block.position * root.block_size + root.block_size * part.anchor
 	for surface_id in part.occluder_mesh.get_surface_count():
 		_occluder_tool.append_from(part.occluder_mesh, surface_id, 
 				part.occluder_transform.translated(part_origin))
