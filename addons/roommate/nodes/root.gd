@@ -92,10 +92,35 @@ const _ASSEMBLERS := {
 @export var create_occluder_container_if_missing := SettingBool.FROM_SETTINGS
 
 var _part_processors := {
-	RoommateBlock.SPACE_TYPE: _process_space_block_part,
-	RoommateBlock.OBLIQUE_TYPE: _process_oblique_block_part,
-	RoommateBlock.NODRAW_TYPE: _process_nodraw_block_part,
+	RoommateBlock.SPACE_TYPE: process_space_block_part,
+	RoommateBlock.OBLIQUE_TYPE: process_oblique_block_part,
+	RoommateBlock.NODRAW_TYPE: process_nodraw_block_part,
 }
+
+
+static func process_space_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
+		all_blocks: Dictionary) -> RoommatePart:
+	if not part:
+		return null
+	var next_position := block.position + (part.flow as Vector3i)
+	var next_block := all_blocks.get(next_position) as RoommateBlock
+	return part if not next_block or part.flow == Vector3.ZERO else null
+
+
+static func process_oblique_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
+		all_blocks: Dictionary) -> RoommatePart:
+	if not part:
+		return null
+	var next_position := block.position + (part.flow as Vector3i)
+	var next_block := all_blocks.get(next_position) as RoommateBlock
+	if slot_id == RoommateBlock.Slot.OBLIQUE:
+		return part
+	return part if not next_block or part.flow == Vector3.ZERO else null
+
+
+static func process_nodraw_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
+		all_blocks: Dictionary) -> RoommatePart:
+	return null
 
 
 static func resolve_setting_bool(setting_id: StringName, value: SettingBool) -> bool:
@@ -280,28 +305,3 @@ func try_save_resource(new_resource: Resource, path_to_resource: String, postfix
 		new_resource.take_over_path(path)
 		return true
 	return false
-
-
-func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
-		all_blocks: Dictionary) -> RoommatePart:
-	if not part:
-		return null
-	var next_position := block.position + (part.flow as Vector3i)
-	var next_block := all_blocks.get(next_position) as RoommateBlock
-	return part if not next_block or part.flow == Vector3.ZERO else null
-
-
-func _process_oblique_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
-		all_blocks: Dictionary) -> RoommatePart:
-	if not part:
-		return null
-	var next_position := block.position + (part.flow as Vector3i)
-	var next_block := all_blocks.get(next_position) as RoommateBlock
-	if slot_id == RoommateBlock.Slot.OBLIQUE:
-		return part
-	return part if not next_block or part.flow == Vector3.ZERO else null
-
-
-func _process_nodraw_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
-		all_blocks: Dictionary) -> RoommatePart:
-	return null
