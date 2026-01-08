@@ -10,6 +10,7 @@
 extends RefCounted
 
 const _SETTINGS := preload("../../plugin_settings.gd")
+const _CONVERTERS := preload("../../utils/converters.gd")
 
 
 func add_part(part: RoommatePart, block: RoommateBlock, root: RoommateRoot) -> void:

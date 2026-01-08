@@ -23,11 +23,12 @@ enum SettingBool {
 }
 
 const MESH_SINGLE := &"mtid_single"
+const MESH_CHUNKS := &"mtid_chunks"
 
 const COLLISION_CONCAVE := &"csid_concave"
 const COLLISION_CONVEX := &"csid_convex"
 
-const SCENES_ALL := &"stid_scenes"
+const SCENES_ALL := &"stid_all"
 
 const NAV_SINGLE := &"nmtid_single"
 
@@ -39,6 +40,7 @@ const _INTERNAL_STYLE := preload("../resources/styles/internal_style.gd")
 const _ASSEMBLER := preload("./root_assemblers/assembler.gd")
 const _ASSEMBLERS := {
 	MESH_SINGLE: preload("./root_assemblers/mesh_single_assembler.gd"),
+	MESH_CHUNKS: preload("./root_assemblers/mesh_chunks_assembler.gd"),
 	COLLISION_CONCAVE: preload("./root_assemblers/collision_single_concave_assembler.gd"),
 	COLLISION_CONVEX: preload("./root_assemblers/collision_single_convex_assembler.gd"),
 	SCENES_ALL: preload("./root_assemblers/scenes_all_assembler.gd"),
@@ -59,12 +61,14 @@ const _ASSEMBLERS := {
 @export var generate_on_ready := false
 
 @export_group("Mesh")
-@export_enum(MESH_SINGLE) var mesh_type := String(MESH_SINGLE)
+@export_enum(MESH_SINGLE, MESH_CHUNKS) var mesh_type := String(MESH_SINGLE)
+@export var mesh_chunk_size := Vector3i.ONE * 3
 @export_node_path("MeshInstance3D") var linked_mesh_container: NodePath
 @export_file("*.tres", "*.res") var path_to_mesh_resource: String
+@export_dir var path_to_mesh_resources_directory: String
 @export var create_mesh_container_if_missing := SettingBool.FROM_SETTINGS
 @export var index_mesh := true
-@export var generate_normals := false
+@export var generate_normals := true
 @export var generate_tangents := true
 
 @export_group("Collision")
@@ -284,7 +288,8 @@ func get_owned_scenes() -> Array[Node]:
 	return all_scenes.filter(filter_by_parents_and_self) as Array[Node]
 
 
-func try_save_resource(new_resource: Resource, path_to_resource: String, postfix_setting: StringName) -> bool:
+func try_save_resource(new_resource: Resource, path_to_resource: String, postfix_setting: StringName,
+		before_postfix_string := String()) -> bool:
 	var path := path_to_resource
 	var auto_creation_requested := resolve_setting_bool(&"stid_auto_create_resource_files", auto_create_resource_files) and path.is_empty()
 	if auto_creation_requested:
@@ -294,7 +299,7 @@ func try_save_resource(new_resource: Resource, path_to_resource: String, postfix
 		var scene_node := get_tree().edited_scene_root if Engine.is_editor_hint() else get_tree().current_scene
 		var scene_path := scene_node.scene_file_path
 		var postfix := _SETTINGS.get_string(postfix_setting)
-		path = scene_path.path_join("..").simplify_path().path_join(name.to_snake_case() + postfix)
+		path = scene_path.path_join("..").simplify_path().path_join(name.to_snake_case() + before_postfix_string + postfix)
 	if ResourceLoader.exists(path) or auto_creation_requested:
 		var save_error := ResourceSaver.save(new_resource, path)
 		if save_error != OK:
