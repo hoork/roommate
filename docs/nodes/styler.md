@@ -1,3 +1,0 @@
-# Styler
-
-## Blocks Scope

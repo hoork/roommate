@@ -2,6 +2,15 @@
 
 There are several functions in ruleset that are responsible for selecting certain blocks by condition. Blocks selectors are limited by blocks scope.
 
+## Default Block Types Reference
+
+| Block Type Id        | Const                              |
+| -------------------- | ---------------------------------- |
+| *btid_nodraw*        | `RoommateBlock.NODRAW_TYPE`        |
+| *btid_space*         | `RoommateBlock.SPACE_TYPE`         |
+| *btid_oblique*       | `RoommateBlock.OBLIQUE_TYPE`       |
+| *btid_out_of_bounds* | `RoommateBlock.OUT_OF_BOUNDS_TYPE` |
+
 ## Blocks Selection Functions
 
 Let's take this scene, for example, and apply various block selector rules. Selected blocks will be colored red.

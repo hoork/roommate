@@ -51,19 +51,14 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting Started:
-    - getting_started/installation.md
-    - getting_started/first_room.md
     - getting_started/core_concepts.md
+    - getting_started/installation.md
     - getting_started/settings.md
-  - Styles:
-    - styles/styles_intro.md
-    - styles/creating_styles.md
-    - styles/selecting_blocks.md
-    - styles/selecting_parts.md
-  - Nodes:
-    - nodes/root.md
-    - nodes/area.md
-    - nodes/styler.md
-  - Non-Plugin Setup:
-    - non_plugin_setup/troubleshooting.md
-    - non_plugin_setup/creating_models.md
+  - Tutorials:
+    - tutorials/create_rooms.md
+    - tutorials/styles.md
+    - tutorials/positioning.md
+    - tutorials/surfaces.md
+  - References:
+    - references/selecting_blocks.md
+    - references/selecting_parts.md
