@@ -51,6 +51,7 @@ const BLOCKS_SELECTOR_SEEDED_RANDOM := &"sbsid_seeded_random"
 @export var mesh_offset := Vector3.ZERO
 @export var mesh_rotation := Vector3.ZERO
 @export var mesh_scale := Vector3.ONE
+@export var clear_mesh := false
 @export var mesh: Mesh = null
 
 @export_group("Mesh Surface")
@@ -64,12 +65,14 @@ const BLOCKS_SELECTOR_SEEDED_RANDOM := &"sbsid_seeded_random"
 @export var collision_offset := Vector3.ZERO
 @export var collision_rotation := Vector3.ZERO
 @export var collision_scale := Vector3.ONE
+@export var clear_collision_mesh := false
 @export var collision_mesh: Mesh = null
 
 @export_group("Scenes")
 @export var scene_offset := Vector3.ZERO
 @export var scene_rotation := Vector3.ZERO
 @export var scene_scale := Vector3.ONE
+@export var clear_scene := false
 @export var scene: PackedScene = null
 @export var scene_parent_path := String()
 @export var scene_property_overrides := {}
@@ -78,4 +81,12 @@ const BLOCKS_SELECTOR_SEEDED_RANDOM := &"sbsid_seeded_random"
 @export var nav_offset := Vector3.ZERO
 @export var nav_rotation := Vector3.ZERO
 @export var nav_scale := Vector3.ONE
+@export var clear_nav_mesh := false
 @export var nav_mesh: Mesh = null
+
+@export_group("Occlusion")
+@export var occluder_offset := Vector3.ZERO
+@export var occluder_rotation := Vector3.ZERO
+@export var occluder_scale := Vector3.ONE
+@export var clear_occluder_mesh := false
+@export var occluder_mesh: Mesh = null

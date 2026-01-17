@@ -88,6 +88,8 @@ func _build_simple_ruleset(simple_ruleset: RoommateSimpleRuleset) -> void:
 			simple_ruleset.scene_rotation, simple_ruleset.scene_scale, uniform_transform)
 	var nav_transform := _build_transform_fallback(simple_ruleset.nav_offset, 
 			simple_ruleset.nav_rotation, simple_ruleset.nav_scale, uniform_transform)
+	var occluder_transform := _build_transform_fallback(simple_ruleset.occluder_offset,
+			simple_ruleset.occluder_rotation, simple_ruleset.occluder_scale, uniform_transform)
 	if mesh_transform != Transform3D.IDENTITY:
 		parts_selector.mesh_transform.accumulate(mesh_transform)
 	if collision_transform != Transform3D.IDENTITY:
@@ -96,20 +98,39 @@ func _build_simple_ruleset(simple_ruleset: RoommateSimpleRuleset) -> void:
 		parts_selector.scene_transform.accumulate(scene_transform)
 	if nav_transform != Transform3D.IDENTITY:
 		parts_selector.nav_transform.accumulate(nav_transform)
+	if occluder_transform != Transform3D.IDENTITY:
+		parts_selector.occluder_transform.accumulate(occluder_transform)
 	
 	# mesh overrides
 	var mesh := simple_ruleset.mesh if simple_ruleset.mesh else simple_ruleset.uniform_mesh
 	var collision_mesh := simple_ruleset.collision_mesh if simple_ruleset.collision_mesh else simple_ruleset.uniform_mesh
 	var nav_mesh := simple_ruleset.nav_mesh if simple_ruleset.nav_mesh else simple_ruleset.uniform_mesh
-	if mesh:
+	var occluder_mesh = simple_ruleset.occluder_mesh if simple_ruleset.occluder_mesh else simple_ruleset.uniform_mesh
+	
+	if simple_ruleset.clear_mesh:
+		parts_selector.mesh.override(null)
+	elif mesh:
 		parts_selector.mesh.override(mesh)
-	if collision_mesh:
+	
+	if simple_ruleset.clear_collision_mesh:
+		parts_selector.collision_mesh.override(null)
+	elif collision_mesh:
 		parts_selector.collision_mesh.override(collision_mesh)
-	if nav_mesh:
+	
+	if simple_ruleset.clear_nav_mesh:
+		parts_selector.nav_mesh.override(null)
+	elif nav_mesh:
 		parts_selector.nav_mesh.override(nav_mesh)
 	
+	if simple_ruleset.clear_occluder_mesh:
+		parts_selector.occluder_mesh.override(null)
+	elif occluder_mesh:
+		parts_selector.occluder_mesh.override(occluder_mesh)
+	
 	# scenes overrides
-	if simple_ruleset.scene:
+	if simple_ruleset.clear_scene:
+		parts_selector.scene.override(null)
+	elif simple_ruleset.scene:
 		parts_selector.scene.override(simple_ruleset.scene)
 	if not simple_ruleset.scene_parent_path.is_empty():
 		parts_selector.scene_parent_path.override(NodePath(simple_ruleset.scene_parent_path))
