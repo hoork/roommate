@@ -87,6 +87,7 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	if not anchor_valid or anchor_up_valid:
 		if has_fill:
 			new_block.type_id = RoommateBlock.OUT_OF_BOUNDS_TYPE
+			new_block.marked_for_deletion = true
 			return new_block
 		if (not clear_over and is_over_plane) or (not clear_under and not is_over_plane):
 			return null
