@@ -68,7 +68,7 @@ const _ASSEMBLERS := {
 @export_dir var path_to_mesh_resources_directory: String
 @export var create_mesh_container_if_missing := SettingBool.FROM_SETTINGS
 @export var index_mesh := true
-@export var generate_normals := true
+@export var generate_normals := false
 @export var generate_tangents := true
 
 @export_group("Collision")
@@ -227,9 +227,6 @@ func create_blocks() -> Dictionary:
 
 
 func register_block_type_id(block_type_id: StringName, part_processor: Callable) -> void:
-	if _part_processors.has(block_type_id):
-		push_error("ROOMMATE: Block type %s already registered." % block_type_id)
-		return
 	_part_processors[block_type_id] = part_processor
 
 
