@@ -37,4 +37,4 @@ Now you can create new Resource file with this script and set it to Style proper
 
 For example, we can set style above to the RoommateSpace. After clicking **Generate** button, we can see the result. 
 
-![](../assets/images/changing_appearance_of_rooms/creating_styles_example_result.webp)
+![](../assets/images/placeholder.png)
