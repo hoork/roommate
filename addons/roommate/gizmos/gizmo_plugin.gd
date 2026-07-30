@@ -12,7 +12,7 @@ extends EditorNode3DGizmoPlugin
 signal area_handle_commited(area: RoommateBlocksArea,
 		original_transform: Transform3D,
 		original_size: Vector3)
-signal redrawed(gizmo: EditorNode3DGizmo)
+signal redraw_started(gizmo: EditorNode3DGizmo)
 
 const _AREA_EDIT_GIZMO := preload("./area_edit_gizmo.gd")
 const _BLOCKS_AREA_GIZMO := preload("./blocks_gizmo.gd")
@@ -43,7 +43,7 @@ func _create_gizmo(for_node_3d: Node3D) -> EditorNode3DGizmo:
 	
 	if is_instance_valid(new_gizmo):
 		new_gizmo.area_handle_commited.connect(_area_handle_commited_bubbling)
-		new_gizmo.redrawed.connect(_redrawed_bubbling)
+		new_gizmo.redraw_started.connect(_redraw_started_bubbling)
 	return new_gizmo
 
 
@@ -53,5 +53,5 @@ func _area_handle_commited_bubbling(area: RoommateBlocksArea,
 	area_handle_commited.emit(area, original_transform, original_size)
 
 
-func _redrawed_bubbling(gizmo: EditorNode3DGizmo) -> void:
-	redrawed.emit(gizmo)
+func _redraw_started_bubbling(gizmo: EditorNode3DGizmo) -> void:
+	redraw_started.emit(gizmo)

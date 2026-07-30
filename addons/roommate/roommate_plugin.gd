@@ -11,6 +11,7 @@ extends EditorPlugin
 
 const _SETTINGS := preload("./plugin_settings.gd")
 const _GIZMO_PLUGIN := preload("./gizmos/gizmo_plugin.gd")
+const _AREA_EDIT_GIZMO := preload("./gizmos/area_edit_gizmo.gd")
 const _EDITOR_ACTIONS := preload("./editor_actions.gd")
 const _ROOMMATE_MENU_BUTTON := preload("./controls/roommate_menu_button.gd")
 
@@ -30,7 +31,7 @@ func _enter_tree() -> void:
 	_SETTINGS.init_settings(editor_settings)
 	
 	_gizmo_plugin.area_handle_commited.connect(_on_gizmo_area_handle_commited)
-	_gizmo_plugin.redrawed.connect(_on_gizmo_redrawed)
+	_gizmo_plugin.redraw_started.connect(_on_gizmo_redraw_started)
 	add_node_3d_gizmo_plugin(_gizmo_plugin)
 	
 	# menus
@@ -89,7 +90,7 @@ func _exit_tree() -> void:
 	_menu_buttons.clear()
 	remove_node_3d_gizmo_plugin(_gizmo_plugin)
 	_gizmo_plugin.area_handle_commited.disconnect(_on_gizmo_area_handle_commited)
-	_gizmo_plugin.redrawed.disconnect(_on_gizmo_redrawed)
+	_gizmo_plugin.redraw_started.disconnect(_on_gizmo_redraw_started)
 	_gizmo_plugin = null
 
 
@@ -117,9 +118,12 @@ func _on_gizmo_area_handle_commited(area: RoommateBlocksArea,
 	ur.commit_action()
 
 
-func _on_gizmo_redrawed(gizmo: EditorNode3DGizmo) -> void:
+func _on_gizmo_redraw_started(gizmo: EditorNode3DGizmo) -> void:
+	var area_edit_gizmo := gizmo as _AREA_EDIT_GIZMO
+	if not is_instance_valid(area_edit_gizmo):
+		return
 	var selected_nodes := get_editor_interface().get_selection().get_selected_nodes()
-	gizmo.set_hidden(not selected_nodes.has(gizmo.get_node_3d()) or selected_nodes.size() > 1)
+	area_edit_gizmo.draw_area_edit = selected_nodes.has(gizmo.get_node_3d()) and selected_nodes.size() == 1
 
 
 func _get_action(method_name: StringName) -> Callable:

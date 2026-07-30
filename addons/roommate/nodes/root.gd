@@ -212,7 +212,6 @@ func create_blocks() -> Dictionary:
 	var global_style_path := _SETTINGS.get_string(&"stid_global_style")
 	if ResourceLoader.exists(global_style_path):
 		var global_style := load(String(global_style_path)) as RoommateStyle
-		print(global_style)
 		if global_style:
 			global_style.apply(all_blocks)
 	

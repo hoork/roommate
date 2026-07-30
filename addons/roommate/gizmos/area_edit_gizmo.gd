@@ -12,7 +12,7 @@ extends EditorNode3DGizmo
 signal area_handle_commited(area: RoommateBlocksArea,
 		original_transform: Transform3D,
 		original_size: Vector3)
-signal redrawed(gizmo: EditorNode3DGizmo)
+signal redraw_started(gizmo: EditorNode3DGizmo)
 
 const _HANDLE_DIRECTIONS: Array[Vector3] = [
 	Vector3.UP,
@@ -24,7 +24,8 @@ const _HANDLE_DIRECTIONS: Array[Vector3] = [
 ]
 const _SETTINGS := preload("../plugin_settings.gd")
 
-var handles_3d_size: float = 0.0
+var handles_3d_size := 0.0
+var draw_area_edit := false
 var _original_area_global_transform: Variant = null
 var _original_area_size: Variant = null
 
@@ -116,6 +117,7 @@ func _commit_handle(handle_id: int, secondary: bool, restore: Variant, cancel: b
 
 func _redraw() -> void:
 	clear()
+	redraw_started.emit(self)
 	_draw_area_edit()
 	
 	var area := get_node_3d() as RoommateBlocksArea
@@ -123,11 +125,9 @@ func _redraw() -> void:
 	
 	# blocks range
 	if not root:
-		redrawed.emit(self)
 		return
 	
 	_redraw_area(area, root)
-	redrawed.emit(self)
 
 
 func _redraw_area(area: RoommateBlocksArea, root: RoommateRoot) -> void: # virtual function
@@ -136,6 +136,9 @@ func _redraw_area(area: RoommateBlocksArea, root: RoommateRoot) -> void: # virtu
 
 func _draw_area_edit() -> void:
 	var area := get_node_3d() as RoommateBlocksArea
+	
+	if not draw_area_edit:
+		return
 	
 	# area
 	var area_material := get_plugin().get_material("area", self)
