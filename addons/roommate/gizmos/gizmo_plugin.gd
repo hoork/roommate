@@ -9,14 +9,17 @@
 @tool
 extends EditorNode3DGizmoPlugin
 
+signal area_handle_commited(area: RoommateBlocksArea,
+		original_transform: Transform3D,
+		original_size: Vector3)
+signal redrawed(gizmo: EditorNode3DGizmo)
+
+const _AREA_EDIT_GIZMO := preload("./area_edit_gizmo.gd")
 const _BLOCKS_AREA_GIZMO := preload("./blocks_gizmo.gd")
 const _OBLIQUE_GIZMO := preload("./oblique_gizmo.gd")
 
-var _plugin: EditorPlugin
-
 
 func _init(plugin: EditorPlugin) -> void:
-	_plugin = plugin
 	create_material("blocks", Color.GREEN)
 	create_material("area", Color.AQUA)
 	create_material("handles_3d", Color.YELLOW)
@@ -32,8 +35,23 @@ func _get_gizmo_name() -> String:
 
 
 func _create_gizmo(for_node_3d: Node3D) -> EditorNode3DGizmo:
+	var new_gizmo: _AREA_EDIT_GIZMO = null
 	if for_node_3d is RoommateOblique:
-		return _OBLIQUE_GIZMO.new(_plugin)
+		new_gizmo = _OBLIQUE_GIZMO.new()
 	if for_node_3d is RoommateBlocksArea:
-		return _BLOCKS_AREA_GIZMO.new(_plugin)
-	return null
+		new_gizmo = _BLOCKS_AREA_GIZMO.new()
+	
+	if is_instance_valid(new_gizmo):
+		new_gizmo.area_handle_commited.connect(_area_handle_commited_bubbling)
+		new_gizmo.redrawed.connect(_redrawed_bubbling)
+	return new_gizmo
+
+
+func _area_handle_commited_bubbling(area: RoommateBlocksArea, 
+		original_transform: Transform3D,
+		original_size: Vector3) -> void:
+	area_handle_commited.emit(area, original_transform, original_size)
+
+
+func _redrawed_bubbling(gizmo: EditorNode3DGizmo) -> void:
+	redrawed.emit(gizmo)

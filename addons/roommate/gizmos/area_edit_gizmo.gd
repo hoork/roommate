@@ -9,6 +9,11 @@
 @tool
 extends EditorNode3DGizmo
 
+signal area_handle_commited(area: RoommateBlocksArea,
+		original_transform: Transform3D,
+		original_size: Vector3)
+signal redrawed(gizmo: EditorNode3DGizmo)
+
 const _HANDLE_DIRECTIONS: Array[Vector3] = [
 	Vector3.UP,
 	Vector3.DOWN,
@@ -22,11 +27,9 @@ const _SETTINGS := preload("../plugin_settings.gd")
 var handles_3d_size: float = 0.0
 var _original_area_global_transform: Variant = null
 var _original_area_size: Variant = null
-var _plugin: EditorPlugin
 
 
-func _init(plugin: EditorPlugin) -> void:
-	_plugin = plugin
+func _init() -> void:
 	var version := Engine.get_version_info()
 	if version["major"] == 4 and version["minor"] == 0:
 		handles_3d_size = 0.1
@@ -108,21 +111,31 @@ func _commit_handle(handle_id: int, secondary: bool, restore: Variant, cancel: b
 		if root:
 			area.snap_to_range(root.global_transform, root.block_size)
 	
-	var undo_redo := _plugin.get_undo_redo()
-	undo_redo.create_action("ROOMMATE: Change Area Size")
-	undo_redo.add_undo_property(area, &"global_transform", original_transform)
-	undo_redo.add_do_property(area, &"global_transform", area.global_transform)
-	undo_redo.add_undo_property(area, &"size", original_size)
-	undo_redo.add_do_property(area, &"size", area.size)
-	undo_redo.commit_action()
+	area_handle_commited.emit(area, original_transform, original_size)
+
+
+func _redraw() -> void:
+	clear()
+	_draw_area_edit()
+	
+	var area := get_node_3d() as RoommateBlocksArea
+	var root := area.find_root()
+	
+	# blocks range
+	if not root:
+		redrawed.emit(self)
+		return
+	
+	_redraw_area(area, root)
+	redrawed.emit(self)
+
+
+func _redraw_area(area: RoommateBlocksArea, root: RoommateRoot) -> void: # virtual function
+	pass
 
 
 func _draw_area_edit() -> void:
 	var area := get_node_3d() as RoommateBlocksArea
-	var area_selected := _plugin.get_editor_interface().get_selection().get_selected_nodes().has(area)
-	
-	if not area_selected:
-		return
 	
 	# area
 	var area_material := get_plugin().get_material("area", self)

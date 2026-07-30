@@ -10,17 +10,7 @@
 extends "./area_edit_gizmo.gd"
 
 
-func _redraw() -> void:
-	clear()
-	_draw_area_edit()
-	
-	var area := get_node_3d() as RoommateOblique
-	var root := area.find_root()
-	
-	# blocks range
-	if not root:
-		return
-	
+func _redraw_area(area: RoommateBlocksArea, root: RoommateRoot) -> void:
 	var blocks_box := area.get_blocks_range(root.global_transform, root.block_size)
 	blocks_box.size *= root.block_size
 	blocks_box.position *= root.block_size

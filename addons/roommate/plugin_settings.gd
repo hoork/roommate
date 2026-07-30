@@ -12,8 +12,6 @@ extends RefCounted
 const SETTINGS_PATH_TEMPLATE := "roommate/%s/%s"
 const _DEFAULTS := preload("./defaults/default_settings.tres")
 
-var _editor_settings: EditorSettings
-
 
 static func get_bool(setting_id: StringName) -> bool:
 	return get_or_default(setting_id) as bool
@@ -52,19 +50,15 @@ static func _get_path(settind_id: StringName) -> String:
 	return SETTINGS_PATH_TEMPLATE % [category, settind_id.trim_prefix("stid_")]
 
 
-func _init(plugin: EditorPlugin) -> void:
-	_editor_settings = plugin.get_editor_interface().get_editor_settings()
-
-
-func init_settings() -> void:
+static func init_settings(editor_settings: EditorSettings) -> void:
 	for setting_id in _DEFAULTS.shortcuts:
 		var shortcut_path := _get_path(setting_id)
 		var default_shortcut := Shortcut.new()
 		default_shortcut.events = [_DEFAULTS.shortcuts[setting_id].duplicate() as InputEventKey]
-		var create_shortcut := not _editor_settings.has_setting(shortcut_path)
+		var create_shortcut := not editor_settings.has_setting(shortcut_path)
 		if create_shortcut:
-			_editor_settings.set_setting(shortcut_path, default_shortcut)
-		_editor_settings.set_initial_value(shortcut_path, default_shortcut, false)
+			editor_settings.set_setting(shortcut_path, default_shortcut)
+		editor_settings.set_initial_value(shortcut_path, default_shortcut, false)
 	
 	for setting_id in _DEFAULTS.settings:
 		var setting_path := _get_path(setting_id)
@@ -80,24 +74,24 @@ func init_settings() -> void:
 			ProjectSettings.add_property_info(info)
 
 
-func get_shortcut(setting_id: StringName) -> Shortcut:
+static func get_shortcut(setting_id: StringName, editor_settings: EditorSettings) -> Shortcut:
 	var path := _get_path(setting_id)
-	if not _editor_settings.has_setting(path):
+	if not editor_settings.has_setting(path):
 		push_error("ROOMMATE: Editor setting %s doesn't exist." % path)
 		var default_shortcut := Shortcut.new()
 		default_shortcut.events = [_DEFAULTS.shortcuts[setting_id].duplicate() as InputEventKey]
 		return default_shortcut
-	var shortcut := _editor_settings.get_setting(path) as Shortcut
+	var shortcut := editor_settings.get_setting(path) as Shortcut
 	if not shortcut:
 		push_error("ROOMMATE: Wrong type of editor setting %s. Shortcut expected." % path)
 		return null
 	return shortcut
 
 
-func clear() -> void:
+static func clear(editor_settings: EditorSettings) -> void:
 	for setting_id in _DEFAULTS.settings:
 		var setting_path := _get_path(setting_id)
 		ProjectSettings.set_setting(setting_path, null)
 	for shortcut_id in _DEFAULTS.shortcuts:
 		var shortcut_path := _get_path(shortcut_id)
-		_editor_settings.erase(shortcut_path)
+		editor_settings.erase(shortcut_path)
