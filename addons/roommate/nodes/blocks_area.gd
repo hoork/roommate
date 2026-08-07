@@ -72,7 +72,7 @@ func create_blocks(root_transform: Transform3D, block_size: float) -> Dictionary
 		new_block.position = block_position
 		new_block.rotation = block_rotation
 		var processed_block := _process_block(new_block, blocks_range)
-		if processed_block:
+		if is_instance_valid(processed_block):
 			processed_block.position = block_position
 			processed_block.rotation = block_rotation
 			for slot_id in extra_slots:
@@ -120,7 +120,7 @@ func snap_to_range(root_transform: Transform3D, block_size: float) -> void:
 	else:
 		var local_quat := Quaternion.from_euler(rotation.snapped(Vector3.ONE * PI / 2))
 		var parent := get_parent() as Node3D
-		if parent:
+		if is_instance_valid(parent):
 			local_quat = Quaternion.from_euler(parent.global_rotation).inverse() * new_global_quat
 		rotation = local_quat.get_euler()
 	
@@ -138,7 +138,7 @@ func find_root() -> RoommateRoot:
 	var parent := get_parent()
 	while not parent is RoommateRoot:
 		parent = parent.get_parent()
-		if not parent:
+		if not is_instance_valid(parent):
 			return null
 	return parent as RoommateRoot
 

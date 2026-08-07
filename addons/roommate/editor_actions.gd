@@ -64,25 +64,25 @@ static func generate_roots(roots: Array[RoommateRoot], ur: EditorUndoRedoManager
 		# pre-generate mesh
 		var old_mesh_container := root.get_node_or_null(root.linked_mesh_container) as Node3D
 		var old_mesh_instance := old_mesh_container as MeshInstance3D
-		if old_mesh_instance:
+		if is_instance_valid(old_mesh_instance):
 			ur.add_undo_property(old_mesh_instance, &"mesh", old_mesh_instance.mesh)
-		elif old_mesh_container:
+		elif is_instance_valid(old_mesh_container):
 			pass
 		ur.add_undo_property(root, &"linked_mesh_container", root.linked_mesh_container)
 		
 		# pre-generate collision
 		var collision_shape_container := root.get_node_or_null(root.linked_collision_shape_container) as CollisionShape3D
-		if collision_shape_container:
+		if is_instance_valid(collision_shape_container):
 			ur.add_undo_property(collision_shape_container, &"shape", collision_shape_container.shape)
 		
 		# pre-generate nav
 		var nav_mesh_container := root.get_node_or_null(root.linked_nav_mesh_container) as NavigationRegion3D
-		if nav_mesh_container:
+		if is_instance_valid(nav_mesh_container):
 			ur.add_undo_property(nav_mesh_container, &"navigation_mesh", nav_mesh_container.navigation_mesh)
 		
 		# pre-generate occlusion
 		var occluder_container := root.get_node_or_null(root.linked_occluder_container) as OccluderInstance3D
-		if occluder_container:
+		if is_instance_valid(occluder_container):
 			ur.add_undo_property(occluder_container, &"occluder", occluder_container.occluder)
 		
 		# generating everything...
@@ -92,28 +92,28 @@ static func generate_roots(roots: Array[RoommateRoot], ur: EditorUndoRedoManager
 		var new_mesh_container := root.get_node_or_null(root.linked_mesh_container) as Node3D
 		var new_mesh_instance := new_mesh_container as MeshInstance3D
 		
-		if not old_mesh_container and new_mesh_container:
+		if not is_instance_valid(old_mesh_container) and is_instance_valid(new_mesh_container):
 			ur.add_do_method(new_mesh_container.get_parent(), &"add_child", new_mesh_container)
 			ur.add_do_property(new_mesh_container, &"owner", new_mesh_container.owner)
 			ur.add_do_reference(new_mesh_container)
 			ur.add_undo_method(new_mesh_container.get_parent(), &"remove_child", new_mesh_container)
 		
-		if new_mesh_instance:
+		if is_instance_valid(new_mesh_instance):
 			ur.add_do_property(new_mesh_instance, &"mesh", new_mesh_instance.mesh)
-		elif new_mesh_container:
+		elif is_instance_valid(new_mesh_container):
 			pass
 		ur.add_do_property(root, &"linked_mesh_container", root.linked_mesh_container)
 		
 		# post-generate collision
-		if collision_shape_container:
+		if is_instance_valid(collision_shape_container):
 			ur.add_do_property(collision_shape_container, &"shape", collision_shape_container.shape)
 		
 		# post-generate nav
-		if nav_mesh_container:
+		if is_instance_valid(nav_mesh_container):
 			ur.add_do_property(nav_mesh_container, &"navigation_mesh", nav_mesh_container.navigation_mesh)
 		
 		# post-generate occlusion
-		if occluder_container:
+		if is_instance_valid(occluder_container):
 			ur.add_do_property(occluder_container, &"occluder", occluder_container.occluder)
 		
 		# post-generate scenes
@@ -184,7 +184,7 @@ static func snap_areas(areas: Array[RoommateBlocksArea], ur: EditorUndoRedoManag
 	var root_area_map := {}
 	for area in areas:
 		var related_root := area.find_root()
-		if related_root:
+		if is_instance_valid(related_root):
 			root_area_map[related_root] = area
 	if root_area_map.is_empty():
 		return

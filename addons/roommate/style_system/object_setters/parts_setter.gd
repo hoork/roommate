@@ -60,17 +60,17 @@ func apply(block: RoommateBlock) -> void:
 		if (not inverse_selection and not selected) or (inverse_selection and selected):
 			continue
 		var current_part := block.slots.get(slot_id) as RoommatePart
-		if not current_part:
+		if not is_instance_valid(current_part):
 			continue
 		
 		for property_name in _value_setters:
 			var setter := _value_setters[property_name] as _BASE_VALUE_SETTER
 			setter.apply(current_part)
-		if fallback_surface_override:
+		if is_instance_valid(fallback_surface_override):
 			fallback_surface_override.apply(current_part.fallback_surface_override)
 		for surface_id in surface_overrides:
 			var override_setter := surface_overrides[surface_id] as _SURFACE_OVERRIDE_SETTER
-			if not override_setter:
+			if not is_instance_valid(override_setter):
 				push_warning("ROOMMATE: Surface override setter is null.")
 				continue
 			var current_override := current_part.resolve_surface_override(surface_id)
@@ -89,7 +89,7 @@ func override_surface(surface_id: int) -> _SURFACE_OVERRIDE_SETTER:
 
 
 func override_fallback_surface() -> _SURFACE_OVERRIDE_SETTER:
-	if not fallback_surface_override:
+	if not is_instance_valid(fallback_surface_override):
 		fallback_surface_override = _SURFACE_OVERRIDE_SETTER.new()
 	return fallback_surface_override
 

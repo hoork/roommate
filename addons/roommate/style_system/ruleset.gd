@@ -40,7 +40,7 @@ func apply(blocks_scope: Dictionary) -> void:
 		if not include:
 			continue
 		for setter in _parts_setters:
-			if not setter:
+			if not is_instance_valid(setter):
 				push_warning("ROOMMATE: Parts setter is null.")
 				continue
 			setter.apply(block)

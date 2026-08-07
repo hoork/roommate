@@ -82,7 +82,7 @@ static func get_shortcut(setting_id: StringName, editor_settings: EditorSettings
 		default_shortcut.events = [_DEFAULTS.shortcuts[setting_id].duplicate() as InputEventKey]
 		return default_shortcut
 	var shortcut := editor_settings.get_setting(path) as Shortcut
-	if not shortcut:
+	if not is_instance_valid(shortcut):
 		push_error("ROOMMATE: Wrong type of editor setting %s. Shortcut expected." % path)
 		return null
 	return shortcut

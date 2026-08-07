@@ -20,7 +20,7 @@ const _SETTINGS := preload("../plugin_settings.gd")
 
 func apply_style(all_blocks: Dictionary, root_transform: Transform3D, 
 		block_size: float) -> void:
-	if not style:
+	if not is_instance_valid(style):
 		return
 	var blocks_scope := {}
 	_prepare_for_style(all_blocks, root_transform, block_size)

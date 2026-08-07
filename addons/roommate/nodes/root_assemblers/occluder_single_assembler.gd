@@ -13,7 +13,7 @@ var _occluder_tool := SurfaceTool.new()
 
 
 func add_part(part: RoommatePart, block: RoommateBlock, root: RoommateRoot) -> void:
-	if not part or not part.occluder_mesh:
+	if not is_instance_valid(part) or not is_instance_valid(part.occluder_mesh):
 		return
 	var part_origin := block.position * root.block_size + root.block_size * part.anchor
 	for surface_id in part.occluder_mesh.get_surface_count():
@@ -23,7 +23,7 @@ func add_part(part: RoommatePart, block: RoommateBlock, root: RoommateRoot) -> v
 
 func assemble_and_attach(root: RoommateRoot) -> void:
 	var occluder_container := _resolve_occluder_container(root)
-	if not occluder_container:
+	if not is_instance_valid(occluder_container):
 		return
 	_occluder_tool.index()
 	var occluder := ArrayOccluder3D.new()
@@ -40,7 +40,7 @@ func assemble_and_attach(root: RoommateRoot) -> void:
 
 func _resolve_occluder_container(root: RoommateRoot) -> OccluderInstance3D:
 	var container := root.get_node_or_null(root.linked_occluder_container) as OccluderInstance3D
-	if container:
+	if is_instance_valid(container):
 		return container
 	if RoommateRoot.resolve_setting_bool(&"stid_create_occluder_container_if_missing", root.create_occluder_container_if_missing):
 		container = OccluderInstance3D.new()

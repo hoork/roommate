@@ -13,7 +13,7 @@ var _collision_faces := PackedVector3Array()
 
 
 func add_part(part: RoommatePart, block: RoommateBlock, root: RoommateRoot) -> void:
-	if not part or not part.collision_mesh:
+	if not is_instance_valid(part) or not is_instance_valid(part.collision_mesh):
 		return
 	var part_origin := block.position * root.block_size + root.block_size * part.anchor
 	var part_collision_faces := part.collision_transform.translated(part_origin) * part.collision_mesh.get_faces()
@@ -22,7 +22,7 @@ func add_part(part: RoommatePart, block: RoommateBlock, root: RoommateRoot) -> v
 
 func assemble_and_attach(root: RoommateRoot) -> void:
 	var collision_shape_container := _resolve_collision_shape_container(root)
-	if not collision_shape_container:
+	if not is_instance_valid(collision_shape_container):
 		return
 	var new_shape := ConcavePolygonShape3D.new()
 	if collision_shape_container.shape is ConcavePolygonShape3D:
@@ -35,7 +35,7 @@ func assemble_and_attach(root: RoommateRoot) -> void:
 
 func _resolve_collision_shape_container(root: RoommateRoot) -> CollisionShape3D:
 	var container := root.get_node_or_null(root.linked_collision_shape_container) as CollisionShape3D
-	if container:
+	if is_instance_valid(container):
 		return container
 	if RoommateRoot.resolve_setting_bool(&"stid_create_collision_shape_container_if_missing", root.create_collision_container_if_missing):
 		var static_body := StaticBody3D.new()

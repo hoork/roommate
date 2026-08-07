@@ -48,7 +48,7 @@ static func _get_oblique_block_anchor(block_position: Vector3i, oblique_plane: P
 	var center := (block_position as Vector3) + Vector3.ONE / 2
 	var ray_front := oblique_plane.intersects_ray(center, up_axis)
 	var ray_back := oblique_plane.intersects_ray(center, -up_axis)
-	var intersection := ray_front as Vector3 if ray_front else ray_back as Vector3
+	var intersection := ray_front as Vector3 if ray_front != null else ray_back as Vector3
 	return intersection - center + Vector3.ONE / 2
 
 
@@ -120,6 +120,6 @@ func _create_visible_space_parts(hide_predicate: Callable) -> Dictionary:
 		return slots
 	for slot_id in slots:
 		var part := slots[slot_id] as RoommatePart
-		if part and hide_predicate.call(part):
+		if is_instance_valid(part) and hide_predicate.call(part):
 			slots[slot_id] = null
 	return slots

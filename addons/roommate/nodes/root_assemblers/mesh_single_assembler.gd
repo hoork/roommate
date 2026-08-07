@@ -13,7 +13,7 @@ var _surface_tools := {}
 
 
 func add_part(part: RoommatePart, block: RoommateBlock, root: RoommateRoot) -> void:
-	if not part or not part.mesh:
+	if not is_instance_valid(part) or not is_instance_valid(part.mesh):
 		return
 	
 	var part_origin := block.position * root.block_size + root.block_size * part.anchor
@@ -25,7 +25,7 @@ func add_part(part: RoommatePart, block: RoommateBlock, root: RoommateRoot) -> v
 		var part_surface_override := part.resolve_surface_override_with_fallback(surface_id)
 		# appending surfaces
 		var part_material := part.mesh.surface_get_material(surface_id)
-		if part_surface_override.material:
+		if is_instance_valid(part_surface_override.material):
 			part_material = part_surface_override.material
 			
 		if not _surface_tools.has(part_material):
@@ -39,7 +39,7 @@ func add_part(part: RoommatePart, block: RoommateBlock, root: RoommateRoot) -> v
 
 func assemble_and_attach(root: RoommateRoot) -> void:
 	var container := _resolve_mesh_container(root)
-	if not container:
+	if not is_instance_valid(container):
 		return
 	var new_mesh := _CONVERTERS.surface_tools_dict_to_mesh(_surface_tools, container.mesh,
 			root.index_mesh, root.generate_normals, root.generate_tangents)
@@ -50,7 +50,7 @@ func assemble_and_attach(root: RoommateRoot) -> void:
 
 func _resolve_mesh_container(root: RoommateRoot) -> MeshInstance3D:
 	var container := root.get_node_or_null(root.linked_mesh_container) as MeshInstance3D
-	if container:
+	if is_instance_valid(container):
 		return container
 	if RoommateRoot.resolve_setting_bool(&"stid_create_mesh_container_if_missing", root.create_mesh_container_if_missing):
 		container = MeshInstance3D.new()

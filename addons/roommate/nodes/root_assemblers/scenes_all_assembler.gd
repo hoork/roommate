@@ -13,13 +13,13 @@ var _staged_scenes := {}
 
 
 func add_part(part: RoommatePart, block: RoommateBlock, root: RoommateRoot) -> void:
-	if not part or not part.scene:
+	if not is_instance_valid(part) or not is_instance_valid(part.scene):
 		return
 	
 	var part_origin := block.position * root.block_size + root.block_size * part.anchor
 	var new_scene := part.scene.instantiate() as Node
 	var node3d_scene := new_scene as Node3D
-	if node3d_scene:
+	if is_instance_valid(node3d_scene):
 		node3d_scene.transform = part.scene_transform.translated(part_origin)
 	
 	var parent_path := part.scene_parent_path
@@ -46,7 +46,7 @@ func assemble_and_attach(root: RoommateRoot) -> void:
 	for scene_path in scene_paths:
 		var staged_scene_items := _staged_scenes[scene_path] as Array[StagedScene]
 		var scene_parent := _resolve_scene_parent(root, scene_path)
-		if not scene_parent:
+		if not is_instance_valid(scene_parent):
 			for staged_scene_item in staged_scene_items:
 				var new_scene := staged_scene_item.scene as Node
 				new_scene.queue_free()
@@ -60,7 +60,7 @@ func assemble_and_attach(root: RoommateRoot) -> void:
 			new_scene.add_to_group(_SETTINGS.get_string_name(&"stid_scenes_group"), true)
 			
 			var node3d_scene := new_scene as Node3D
-			if node3d_scene and root.transform_scene_relative_to_part:
+			if is_instance_valid(node3d_scene) and root.transform_scene_relative_to_part:
 				node3d_scene.global_transform = root.global_transform * node3d_scene.transform
 			for key in property_overrides:
 				if key is String or key is StringName:
@@ -72,17 +72,17 @@ func _resolve_scene_parent(root: RoommateRoot, parent_path: NodePath) -> Node:
 	var scene_parent := root.get_node_or_null(parent_path)
 	if parent_path.is_empty():
 		push_warning("ROOMMATE: Scene creation. Path is empty.")
-	elif not scene_parent:
+	elif not is_instance_valid(scene_parent):
 		push_warning("ROOMMATE: Scene creation. Parent doesn't exist at %s." % parent_path)
 	
-	if scene_parent:
+	if is_instance_valid(scene_parent):
 		return scene_parent
 	elif not RoommateRoot.resolve_setting_bool(&"stid_use_scenes_fallback_parent", root.use_scenes_fallback_parent):
 		return null
 	
 	var fallback_name := _SETTINGS.get_string_name(&"stid_scenes_fallback_parent_name")
 	var fallback := root.get_node_or_null(NodePath(fallback_name))
-	if not fallback:
+	if not is_instance_valid(fallback):
 		fallback = Node3D.new()
 		fallback.name = fallback_name
 		root.add_child(fallback)

@@ -104,22 +104,22 @@ var _part_processors := {
 
 static func process_space_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
 		all_blocks: Dictionary) -> RoommatePart:
-	if not part:
+	if not is_instance_valid(part):
 		return null
 	var next_position := block.position + (part.flow as Vector3i)
 	var next_block := all_blocks.get(next_position) as RoommateBlock
-	return part if not next_block or part.flow == Vector3.ZERO else null
+	return part if not is_instance_valid(next_block) or part.flow == Vector3.ZERO else null
 
 
 static func process_oblique_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
 		all_blocks: Dictionary) -> RoommatePart:
-	if not part:
+	if not is_instance_valid(part):
 		return null
 	var next_position := block.position + (part.flow as Vector3i)
 	var next_block := all_blocks.get(next_position) as RoommateBlock
 	if slot_id == RoommateBlock.Slot.OBLIQUE:
 		return part
-	return part if not next_block or part.flow == Vector3.ZERO else null
+	return part if not is_instance_valid(next_block) or part.flow == Vector3.ZERO else null
 
 
 static func process_nodraw_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
@@ -164,7 +164,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 		for slot_id in block.slots:
 			var part := block.slots.get(slot_id) as RoommatePart
 			var processed_part := processor.call(slot_id, part, block, all_blocks) as RoommatePart
-			if processed_part:
+			if is_instance_valid(processed_part):
 				for assembler in assemblers:
 					assembler.add_part(processed_part, block, self)
 	
@@ -194,7 +194,7 @@ func create_blocks() -> Dictionary:
 		var area_blocks := area.create_blocks(global_transform, block_size)
 		for new_block_position in area_blocks:
 			var new_block := area_blocks[new_block_position] as RoommateBlock
-			if not new_block:
+			if not is_instance_valid(new_block):
 				continue
 			if new_block.marked_for_deletion:
 				all_blocks.erase(new_block_position)
@@ -212,7 +212,7 @@ func create_blocks() -> Dictionary:
 	var global_style_path := _SETTINGS.get_string(&"stid_global_style")
 	if ResourceLoader.exists(global_style_path):
 		var global_style := load(String(global_style_path)) as RoommateStyle
-		if global_style:
+		if is_instance_valid(global_style):
 			global_style.apply(all_blocks)
 	
 	# Applying stylers
@@ -232,7 +232,7 @@ func register_block_type_id(block_type_id: StringName, part_processor: Callable)
 func clear_scenes() -> void:
 	for scene in get_owned_scenes():
 		var parent := scene.get_parent()
-		if parent:
+		if is_instance_valid(parent):
 			parent.remove_child(scene)
 		scene.queue_free()
 

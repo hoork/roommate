@@ -109,7 +109,7 @@ func _commit_handle(handle_id: int, secondary: bool, restore: Variant, cancel: b
 	
 	if _SETTINGS.get_bool(&"stid_auto_snap_on_gizmo_edit"):
 		var root := area.find_root()
-		if root:
+		if is_instance_valid(root):
 			area.snap_to_range(root.global_transform, root.block_size)
 	
 	area_handle_commited.emit(area, original_transform, original_size)
@@ -124,7 +124,7 @@ func _redraw() -> void:
 	var root := area.find_root()
 	
 	# blocks range
-	if not root:
+	if not is_instance_valid(root):
 		return
 	
 	_redraw_area(area, root)

@@ -39,7 +39,7 @@ func _build_rulesets() -> void:
 func _build_simple_ruleset(simple_ruleset: RoommateSimpleRuleset) -> void:
 	const RANDOM_DENSITY := 0.5
 	
-	if not simple_ruleset:
+	if not is_instance_valid(simple_ruleset):
 		return
 	var ruleset := create_ruleset()
 	
@@ -102,35 +102,35 @@ func _build_simple_ruleset(simple_ruleset: RoommateSimpleRuleset) -> void:
 		parts_selector.occluder_transform.accumulate(occluder_transform)
 	
 	# mesh overrides
-	var mesh := simple_ruleset.mesh if simple_ruleset.mesh else simple_ruleset.uniform_mesh
-	var collision_mesh := simple_ruleset.collision_mesh if simple_ruleset.collision_mesh else simple_ruleset.uniform_mesh
-	var nav_mesh := simple_ruleset.nav_mesh if simple_ruleset.nav_mesh else simple_ruleset.uniform_mesh
-	var occluder_mesh = simple_ruleset.occluder_mesh if simple_ruleset.occluder_mesh else simple_ruleset.uniform_mesh
+	var mesh := simple_ruleset.mesh if is_instance_valid(simple_ruleset.mesh) else simple_ruleset.uniform_mesh
+	var collision_mesh := simple_ruleset.collision_mesh if is_instance_valid(simple_ruleset.collision_mesh) else simple_ruleset.uniform_mesh
+	var nav_mesh := simple_ruleset.nav_mesh if is_instance_valid(simple_ruleset.nav_mesh) else simple_ruleset.uniform_mesh
+	var occluder_mesh = simple_ruleset.occluder_mesh if is_instance_valid(simple_ruleset.occluder_mesh) else simple_ruleset.uniform_mesh
 	
 	if simple_ruleset.clear_mesh:
 		parts_selector.mesh.override(null)
-	elif mesh:
+	elif is_instance_valid(mesh):
 		parts_selector.mesh.override(mesh)
 	
 	if simple_ruleset.clear_collision_mesh:
 		parts_selector.collision_mesh.override(null)
-	elif collision_mesh:
+	elif is_instance_valid(collision_mesh):
 		parts_selector.collision_mesh.override(collision_mesh)
 	
 	if simple_ruleset.clear_nav_mesh:
 		parts_selector.nav_mesh.override(null)
-	elif nav_mesh:
+	elif is_instance_valid(nav_mesh):
 		parts_selector.nav_mesh.override(nav_mesh)
 	
 	if simple_ruleset.clear_occluder_mesh:
 		parts_selector.occluder_mesh.override(null)
-	elif occluder_mesh:
+	elif is_instance_valid(occluder_mesh):
 		parts_selector.occluder_mesh.override(occluder_mesh)
 	
 	# scenes overrides
 	if simple_ruleset.clear_scene:
 		parts_selector.scene.override(null)
-	elif simple_ruleset.scene:
+	elif is_instance_valid(simple_ruleset.scene):
 		parts_selector.scene.override(simple_ruleset.scene)
 	if not simple_ruleset.scene_parent_path.is_empty():
 		parts_selector.scene_parent_path.override(NodePath(simple_ruleset.scene_parent_path))
@@ -139,7 +139,7 @@ func _build_simple_ruleset(simple_ruleset: RoommateSimpleRuleset) -> void:
 	
 	# surface overrides
 	var surface_override := parts_selector.override_fallback_surface()
-	if simple_ruleset.material:
+	if is_instance_valid(simple_ruleset.material):
 		surface_override.material.override(simple_ruleset.material)
 	if simple_ruleset.color != Color.WHITE:
 		surface_override.set_color(simple_ruleset.color)

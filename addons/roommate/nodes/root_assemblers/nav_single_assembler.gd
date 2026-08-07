@@ -13,7 +13,7 @@ var _nav_tool := SurfaceTool.new()
 
 
 func add_part(part: RoommatePart, block: RoommateBlock, root: RoommateRoot) -> void:
-	if not part or not part.nav_mesh:
+	if not is_instance_valid(part) or not is_instance_valid(part.nav_mesh):
 		return
 	var part_origin := block.position * root.block_size + root.block_size * part.anchor
 	for surface_id in part.nav_mesh.get_surface_count():
@@ -22,10 +22,10 @@ func add_part(part: RoommatePart, block: RoommateBlock, root: RoommateRoot) -> v
 
 func assemble_and_attach(root: RoommateRoot) -> void:
 	var nav_mesh_container := _resolve_nav_mesh_container(root)
-	if nav_mesh_container:
+	if is_instance_valid(nav_mesh_container):
 		_nav_tool.index()
 		var new_nav_mesh := NavigationMesh.new()
-		if nav_mesh_container.navigation_mesh:
+		if is_instance_valid(nav_mesh_container.navigation_mesh):
 			new_nav_mesh = nav_mesh_container.navigation_mesh.duplicate(true) as NavigationMesh
 		new_nav_mesh.create_from_mesh(_nav_tool.commit())
 		
@@ -37,7 +37,7 @@ func assemble_and_attach(root: RoommateRoot) -> void:
 
 func _resolve_nav_mesh_container(root: RoommateRoot) -> NavigationRegion3D:
 	var container := root.get_node_or_null(root.linked_nav_mesh_container) as NavigationRegion3D
-	if container:
+	if is_instance_valid(container):
 		return container
 	if RoommateRoot.resolve_setting_bool(&"stid_create_nav_mesh_container_if_missing", root.create_nav_mesh_container_if_missing):
 		container = NavigationRegion3D.new()
