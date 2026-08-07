@@ -38,7 +38,7 @@ func _create_gizmo(for_node_3d: Node3D) -> EditorNode3DGizmo:
 	var new_gizmo: _AREA_EDIT_GIZMO = null
 	if for_node_3d is RoommateOblique:
 		new_gizmo = _OBLIQUE_GIZMO.new()
-	if for_node_3d is RoommateBlocksArea:
+	elif for_node_3d is RoommateBlocksArea:
 		new_gizmo = _BLOCKS_AREA_GIZMO.new()
 	
 	if is_instance_valid(new_gizmo):
