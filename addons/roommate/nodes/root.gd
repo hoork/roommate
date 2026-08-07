@@ -247,12 +247,14 @@ func get_owned_nodes(node_class_name: StringName) -> Array[Node]:
 	var child_nodes := find_children("*", node_class_name, true, false)
 	var child_roots := find_children("*", &"RoommateRoot", true, false)
 	var nodes: Array[Node] = []
-	var filter_by_parents := func (target: Node) -> bool:
+	for target in child_nodes:
+		var owned := true
 		for parent in child_roots:
 			if parent.is_ancestor_of(target):
-				return false
-		return true
-	nodes.assign(child_nodes.filter(filter_by_parents))
+				owned = false
+				break
+		if owned:
+			nodes.append(target)
 	return nodes
 
 
@@ -274,14 +276,18 @@ func get_owned_scenes() -> Array[Node]:
 		return []
 	var all_scenes := get_tree().get_nodes_in_group(_SETTINGS.get_string_name(&"stid_scenes_group"))
 	var child_roots := find_children("*", &"RoommateRoot", true, false)
-	var filter_by_parents_and_self := func (target: Node) -> bool:
+	var nodes: Array[Node] = []
+	for target in all_scenes:
 		if not is_ancestor_of(target):
-			return false
+			continue
+		var owned := true
 		for parent in child_roots:
 			if parent.is_ancestor_of(target):
-				return false
-		return true
-	return all_scenes.filter(filter_by_parents_and_self) as Array[Node]
+				owned = false
+				break
+		if owned:
+			nodes.append(target)
+	return nodes
 
 
 func try_save_resource(new_resource: Resource, path_to_resource: String, postfix_setting: StringName,
