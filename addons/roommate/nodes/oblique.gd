@@ -92,34 +92,51 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 		if (not clear_over and is_over_plane) or (not clear_under and not is_over_plane):
 			return null
 		new_block.type_id = RoommateBlock.SPACE_TYPE
-		var space_hide_predicate := func(part: RoommatePart) -> bool:
-			var extend_axis_vector := Vector3.ZERO
-			extend_axis_vector[extend_axis_index] = 1
-			return not is_over_plane and part.flow * extend_axis_vector == Vector3.ZERO
-		new_block.slots = _create_visible_space_parts(space_hide_predicate)
+		new_block.slots = _create_visible_space_parts_without_oblique(extend_axis_index, 
+				is_over_plane)
 		return new_block
 	
-	var part_scale := (used_size.length() - max_side_size) / max_side_size + 1
-	var part_transform := Transform3D.IDENTITY.looking_at(-plane.normal, up_axis).scaled_local(Vector3(1, part_scale, 1))
+	var part_basis := Basis.IDENTITY.from_euler(new_block.rotation)
+	var part_scale := Vector3.ONE
+	part_scale[up_axis.max_axis_index()] = used_size[up_axis.max_axis_index()] / used_size[forward_axis.max_axis_index()]
+	var part_transform := Transform3D(part_basis, Vector3.ZERO).scaled(part_scale)
 	var is_top_facing := extend_axis_index != Vector3.AXIS_Y and plane.normal.dot(Vector3.UP) >= 0
-	var oblique_part := _create_default_part(anchor, plane.normal if fill else Vector3.ZERO, 
-			part_transform, is_top_facing)
 	
-	var oblique_hide_predicate := func(part: RoommatePart) -> bool:
-		var flow_dot := plane.normal.dot(part.flow)
-		return flow_dot < 0 and not is_zero_approx(flow_dot)
-	var slots := _create_visible_space_parts(oblique_hide_predicate)
+	var oblique_part := _create_default_part(anchor, plane.normal if fill else Vector3.ZERO, 
+			part_transform)
+	oblique_part.mesh = DEFAULT_OBLIQUE_MESH
+	oblique_part.collision_mesh = DEFAULT_OBLIQUE_MESH
+	oblique_part.nav_mesh = DEFAULT_OBLIQUE_MESH
+	oblique_part.occluder_mesh = DEFAULT_OBLIQUE_MESH
+	
+	var slots := _create_visible_space_parts_with_oblique(plane)
 	slots[RoommateBlock.Slot.OBLIQUE] = oblique_part
 	new_block.slots = slots
 	return new_block
 
 
-func _create_visible_space_parts(hide_predicate: Callable) -> Dictionary:
+func _create_visible_space_parts_without_oblique(extend_axis_index: int, is_over_plane: bool) -> Dictionary:
 	var slots := _create_space_parts()
 	if not fill:
 		return slots
 	for slot_id in slots:
 		var part := slots[slot_id] as RoommatePart
-		if is_instance_valid(part) and hide_predicate.call(part):
-			slots[slot_id] = null
+		if is_instance_valid(part):
+			var extend_axis_vector := Vector3.ZERO
+			extend_axis_vector[extend_axis_index] = 1 
+			if not is_over_plane and part.flow * extend_axis_vector == Vector3.ZERO:
+				slots[slot_id] = null
+	return slots
+
+
+func _create_visible_space_parts_with_oblique(plane: Plane) -> Dictionary:
+	var slots := _create_space_parts()
+	if not fill:
+		return slots
+	for slot_id in slots:
+		var part := slots[slot_id] as RoommatePart
+		if is_instance_valid(part):
+			var flow_dot := plane.normal.dot(part.flow)
+			if flow_dot < 0 and not is_zero_approx(flow_dot):
+				slots[slot_id] = null
 	return slots

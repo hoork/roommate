@@ -21,15 +21,14 @@ func update_inclusion(block: RoommateBlock, blocks_scope: Dictionary,
 			return false
 		return is_included
 	
-	match mode:
-		&"omid_include":
-			return true
-		&"omid_exclude":
-			return false
-		&"omid_invert":
-			return not is_included
-		&"omid_intersect":
-			return is_included
+	if mode == &"omid_include":
+		return true
+	if mode == &"omid_exclude":
+		return false
+	if mode == &"omid_invert":
+		return not is_included
+	if mode == &"omid_intersect":
+		return is_included
 	
 	push_warning("ROOMMATE: Unexpected operation mode id %s." % mode)
 	return is_included

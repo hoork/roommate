@@ -12,6 +12,9 @@ class_name RoommateStyler
 extends Node3D
 
 const DEFAULT_MATERIAL := preload("../defaults/default_material.tres")
+const DEFAULT_QUAD_MESH := preload("../defaults/default_quad_mesh.tres")
+const DEFAULT_OBLIQUE_MESH := preload("../defaults/default_oblique_mesh.tres")
+const DEFAULT_OBLIQUE_SIDE_MESH := preload("../defaults/default_oblique_side_mesh.tres")
 const _SETTINGS := preload("../plugin_settings.gd")
 
 @export var style: RoommateStyle

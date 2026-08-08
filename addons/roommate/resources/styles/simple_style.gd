@@ -44,30 +44,30 @@ func _build_simple_ruleset(simple_ruleset: RoommateSimpleRuleset) -> void:
 	var ruleset := create_ruleset()
 	
 	var blocks_selector: _BLOCK_SELECTOR = null
-	match StringName(simple_ruleset.blocks_selector):
-		RoommateSimpleRuleset.BLOCKS_SELECTOR_ALL:
-			blocks_selector = ruleset.select_all_blocks()
-		RoommateSimpleRuleset.BLOCKS_SELECTOR_SPACE_TYPE:
-			blocks_selector = ruleset.select_blocks_by_type(RoommateBlock.SPACE_TYPE)
-		RoommateSimpleRuleset.BLOCKS_SELECTOR_OBLIQUE_TYPE:
-			blocks_selector = ruleset.select_blocks_by_type(RoommateBlock.OBLIQUE_TYPE)
-		RoommateSimpleRuleset.BLOCKS_SELECTOR_EXTREME:
-			blocks_selector = ruleset.select_blocks_by_extreme(simple_ruleset.blocks_selector_step)
-		RoommateSimpleRuleset.BLOCKS_SELECTOR_EDGE:
-			blocks_selector = ruleset.select_edge_blocks_axis(simple_ruleset.blocks_selector_step)
-		RoommateSimpleRuleset.BLOCKS_SELECTOR_INTERVAL:
-			blocks_selector = ruleset.select_interval_blocks(simple_ruleset.blocks_selector_step)
-		RoommateSimpleRuleset.BLOCKS_SELECTOR_INNER:
-			blocks_selector = ruleset.select_inner_blocks_axis(simple_ruleset.blocks_selector_step)
-		RoommateSimpleRuleset.BLOCKS_SELECTOR_RANDOM:
-			blocks_selector = ruleset.select_random_blocks(RANDOM_DENSITY)
-		RoommateSimpleRuleset.BLOCKS_SELECTOR_SEEDED_RANDOM:
-			var rng := RandomNumberGenerator.new()
-			rng.seed = hash("Roommate")
-			blocks_selector = ruleset.select_random_blocks(RANDOM_DENSITY, rng)
-		_:
-			push_error("ROOMMATE: Unknown simple blocks selector type: %s." % simple_ruleset.blocks_selector)
-			return
+	var blocks_selector_id := StringName(simple_ruleset.blocks_selector)
+	if blocks_selector_id == RoommateSimpleRuleset.BLOCKS_SELECTOR_ALL:
+		blocks_selector = ruleset.select_all_blocks()
+	elif blocks_selector_id == RoommateSimpleRuleset.BLOCKS_SELECTOR_SPACE_TYPE:
+		blocks_selector = ruleset.select_blocks_by_type(RoommateBlock.SPACE_TYPE)
+	elif blocks_selector_id == RoommateSimpleRuleset.BLOCKS_SELECTOR_OBLIQUE_TYPE:
+		blocks_selector = ruleset.select_blocks_by_type(RoommateBlock.OBLIQUE_TYPE)
+	elif blocks_selector_id == RoommateSimpleRuleset.BLOCKS_SELECTOR_EXTREME:
+		blocks_selector = ruleset.select_blocks_by_extreme(simple_ruleset.blocks_selector_step)
+	elif blocks_selector_id == RoommateSimpleRuleset.BLOCKS_SELECTOR_EDGE:
+		blocks_selector = ruleset.select_edge_blocks_axis(simple_ruleset.blocks_selector_step)
+	elif blocks_selector_id == RoommateSimpleRuleset.BLOCKS_SELECTOR_INTERVAL:
+		blocks_selector = ruleset.select_interval_blocks(simple_ruleset.blocks_selector_step)
+	elif blocks_selector_id == RoommateSimpleRuleset.BLOCKS_SELECTOR_INNER:
+		blocks_selector = ruleset.select_inner_blocks_axis(simple_ruleset.blocks_selector_step)
+	elif blocks_selector_id == RoommateSimpleRuleset.BLOCKS_SELECTOR_RANDOM:
+		blocks_selector = ruleset.select_random_blocks(RANDOM_DENSITY)
+	elif blocks_selector_id == RoommateSimpleRuleset.BLOCKS_SELECTOR_SEEDED_RANDOM:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash("Roommate")
+		blocks_selector = ruleset.select_random_blocks(RANDOM_DENSITY, rng)
+	else:
+		push_error("ROOMMATE: Unknown simple blocks selector type: %s." % simple_ruleset.blocks_selector)
+		return
 	blocks_selector.set_offset(simple_ruleset.blocks_selector_offset)
 	
 	var parts_selector := ruleset.select_parts(simple_ruleset.selected_parts)
