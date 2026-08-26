@@ -98,6 +98,7 @@ const _ASSEMBLERS := {
 var _part_processors := {
 	RoommateBlock.SPACE_TYPE: process_space_block_part,
 	RoommateBlock.OBLIQUE_TYPE: process_oblique_block_part,
+	RoommateBlock.OBLIQUE_FILLING_TYPE: process_oblique_filling_type,
 	RoommateBlock.NODRAW_TYPE: process_nodraw_block_part,
 }
 
@@ -108,7 +109,20 @@ static func process_space_block_part(slot_id: StringName, part: RoommatePart, bl
 		return null
 	var next_position := block.position + (part.flow as Vector3i)
 	var next_block := all_blocks.get(next_position) as RoommateBlock
-	return part if not is_instance_valid(next_block) or part.flow == Vector3.ZERO else null
+	if not is_instance_valid(next_block):
+		return part
+	if part.flow == Vector3.ZERO:
+		return part
+	if next_block.type_id == RoommateBlock.OBLIQUE_FILLING_TYPE:
+		return part
+	
+	var oblique_part := next_block.slots.get(RoommateBlock.Slot.OBLIQUE) as RoommatePart
+	var block_rotation := Quaternion.from_euler(next_block.rotation)
+	var block_forward := block_rotation * Vector3.FORWARD
+	var block_bottom := block_rotation * Vector3.DOWN
+	if is_instance_valid(oblique_part) and (is_equal_approx(block_forward.dot(part.flow), -1) or is_equal_approx(block_bottom.dot(part.flow), -1)):
+		return part
+	return null
 
 
 static func process_oblique_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
@@ -119,7 +133,18 @@ static func process_oblique_block_part(slot_id: StringName, part: RoommatePart, 
 	var next_block := all_blocks.get(next_position) as RoommateBlock
 	if slot_id == RoommateBlock.Slot.OBLIQUE:
 		return part
-	return part if not is_instance_valid(next_block) or part.flow == Vector3.ZERO else null
+	if slot_id == RoommateBlock.Slot.OBLIQUE_SIDE_LEFT or slot_id == RoommateBlock.Slot.OBLIQUE_SIDE_RIGHT:
+		return part if is_instance_valid(next_block) and next_block.type_id != RoommateBlock.OBLIQUE_TYPE else null
+	if not is_instance_valid(next_block):
+		return part
+	if part.flow == Vector3.ZERO:
+		return part
+	return null
+
+
+static func process_oblique_filling_type(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
+		all_blocks: Dictionary) -> RoommatePart:
+	return null
 
 
 static func process_nodraw_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 

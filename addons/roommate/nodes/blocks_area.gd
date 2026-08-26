@@ -149,39 +149,3 @@ func get_type_order() -> float: # virtual method
 
 func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlock: # virtual method
 	return null
-
-
-func _create_default_part(anchor: Vector3, flow: Vector3, part_transform: Transform3D, 
-		set_nav := false, set_occluder := true, set_mesh := true) -> RoommatePart:
-	var result := RoommatePart.new()
-	result.anchor = anchor
-	result.flow = flow
-	result.mesh_transform = part_transform
-	result.collision_transform = part_transform
-	result.nav_transform = part_transform
-	result.occluder_transform = part_transform
-	result.scene_transform = part_transform
-	result.mesh = DEFAULT_QUAD_MESH if set_mesh else null
-	result.collision_mesh = DEFAULT_QUAD_MESH if set_mesh else null
-	result.nav_mesh = DEFAULT_QUAD_MESH if set_nav else null
-	result.occluder_mesh = DEFAULT_QUAD_MESH if set_occluder else null
-	return result
-
-
-func _create_space_parts() -> Dictionary:
-	return {
-		RoommateBlock.Slot.CENTER: _create_default_part(Vector3(0.5, 0.5, 0.5), Vector3i.ZERO, 
-			Transform3D.IDENTITY, false, false, false),
-		RoommateBlock.Slot.CEIL: _create_default_part(Vector3(0.5, 1, 0.5), Vector3i.UP, 
-				Transform3D.IDENTITY.rotated(Vector3.RIGHT, PI / 2)),
-		RoommateBlock.Slot.FLOOR: _create_default_part(Vector3(0.5, 0, 0.5), Vector3i.DOWN, 
-				Transform3D.IDENTITY.rotated(Vector3.LEFT, PI / 2), true),
-		RoommateBlock.Slot.WALL_LEFT: _create_default_part(Vector3(0, 0.5, 0.5), Vector3i.LEFT, 
-				Transform3D.IDENTITY.rotated(Vector3.UP, PI / 2)),
-		RoommateBlock.Slot.WALL_RIGHT: _create_default_part(Vector3(1, 0.5, 0.5), Vector3i.RIGHT, 
-				Transform3D.IDENTITY.rotated(Vector3.DOWN, PI / 2)),
-		RoommateBlock.Slot.WALL_FORWARD: _create_default_part(Vector3(0.5, 0.5, 0), Vector3i.FORWARD, 
-				Transform3D.IDENTITY),
-		RoommateBlock.Slot.WALL_BACK: _create_default_part(Vector3(0.5, 0.5, 1), Vector3i.BACK, 
-				Transform3D.IDENTITY.rotated(Vector3.UP, PI)),
-	}

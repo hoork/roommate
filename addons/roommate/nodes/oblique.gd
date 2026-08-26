@@ -86,8 +86,9 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	
 	if not anchor_valid or anchor_up_valid:
 		if has_fill:
-			new_block.type_id = RoommateBlock.OUT_OF_BOUNDS_TYPE
-			new_block.marked_for_deletion = true
+			new_block.type_id = RoommateBlock.OBLIQUE_FILLING_TYPE
+			new_block.slots = _create_visible_space_parts_without_oblique(extend_axis_index, 
+					is_over_plane)
 			return new_block
 		if (not clear_over and is_over_plane) or (not clear_under and not is_over_plane):
 			return null
@@ -99,24 +100,39 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	var part_basis := Basis.IDENTITY.from_euler(new_block.rotation)
 	var part_scale := Vector3.ONE
 	part_scale[up_axis.max_axis_index()] = used_size[up_axis.max_axis_index()] / used_size[forward_axis.max_axis_index()]
-	var part_transform := Transform3D(part_basis, Vector3.ZERO).scaled(part_scale)
 	var is_top_facing := extend_axis_index != Vector3.AXIS_Y and plane.normal.dot(Vector3.UP) >= 0
+	var part_transform := Transform3D(part_basis, Vector3.ZERO).scaled(part_scale)
 	
-	var oblique_part := _create_default_part(anchor, plane.normal if fill else Vector3.ZERO, 
-			part_transform)
-	oblique_part.mesh = DEFAULT_OBLIQUE_MESH
-	oblique_part.collision_mesh = DEFAULT_OBLIQUE_MESH
-	oblique_part.nav_mesh = DEFAULT_OBLIQUE_MESH
-	oblique_part.occluder_mesh = DEFAULT_OBLIQUE_MESH
+	var oblique_part := RoommatePart.create(anchor, 
+			plane.normal if fill else Vector3.ZERO, 
+			part_transform, DEFAULT_OBLIQUE_MESH, 
+			DEFAULT_OBLIQUE_MESH if is_top_facing else null)
+	
+	var left_side_direction := part_basis * Vector3.LEFT
+	var left_side_anchor := anchor
+	left_side_anchor[extend_axis_index] = 1 if left_side_direction[extend_axis_index] > 0 else 0
+	var left_side_transform := part_transform.rotated_local(Vector3.UP, PI / 2)
+	var oblique_side_left := RoommatePart.create(left_side_anchor, left_side_direction,
+			left_side_transform, DEFAULT_OBLIQUE_SIDE_MESH, null)
+	oblique_side_left.fallback_surface_override.flip_faces = true
+	
+	var right_side_direction := part_basis * Vector3.RIGHT
+	var right_side_anchor := anchor
+	right_side_anchor[extend_axis_index] = 1 if right_side_direction[extend_axis_index] > 0 else 0
+	var right_side_transform := part_transform.rotated_local(Vector3.UP, PI / 2)
+	var oblique_side_right := RoommatePart.create(right_side_anchor, right_side_direction,
+			right_side_transform, DEFAULT_OBLIQUE_SIDE_MESH, null)
 	
 	var slots := _create_visible_space_parts_with_oblique(plane)
 	slots[RoommateBlock.Slot.OBLIQUE] = oblique_part
+	slots[RoommateBlock.Slot.OBLIQUE_SIDE_LEFT] = oblique_side_left
+	slots[RoommateBlock.Slot.OBLIQUE_SIDE_RIGHT] = oblique_side_right
 	new_block.slots = slots
 	return new_block
 
 
 func _create_visible_space_parts_without_oblique(extend_axis_index: int, is_over_plane: bool) -> Dictionary:
-	var slots := _create_space_parts()
+	var slots := RoommateSpace.create_parts()
 	if not fill:
 		return slots
 	for slot_id in slots:
@@ -130,7 +146,7 @@ func _create_visible_space_parts_without_oblique(extend_axis_index: int, is_over
 
 
 func _create_visible_space_parts_with_oblique(plane: Plane) -> Dictionary:
-	var slots := _create_space_parts()
+	var slots := RoommateSpace.create_parts()
 	if not fill:
 		return slots
 	for slot_id in slots:

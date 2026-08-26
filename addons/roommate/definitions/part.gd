@@ -32,6 +32,23 @@ var fallback_surface_override := RoommateSurfaceOverride.new()
 var surface_overrides := {}
 
 
+static func create(anchor: Vector3, flow: Vector3, part_transform: Transform3D, 
+		mesh: Mesh, nav_mesh: Mesh) -> RoommatePart:
+	var result := RoommatePart.new()
+	result.anchor = anchor
+	result.flow = flow
+	result.mesh_transform = part_transform
+	result.collision_transform = part_transform
+	result.nav_transform = part_transform
+	result.occluder_transform = part_transform
+	result.scene_transform = part_transform
+	result.mesh = mesh
+	result.collision_mesh = mesh
+	result.nav_mesh = nav_mesh
+	result.occluder_mesh = mesh
+	return result
+
+
 func resolve_surface_override(surface_id: int) -> RoommateSurfaceOverride:
 	if surface_overrides.has(surface_id):
 		return surface_overrides[surface_id] as RoommateSurfaceOverride

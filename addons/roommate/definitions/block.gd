@@ -13,6 +13,7 @@ extends RefCounted
 const NODRAW_TYPE := &"btid_nodraw"
 const SPACE_TYPE := &"btid_space"
 const OBLIQUE_TYPE := &"btid_oblique"
+const OBLIQUE_FILLING_TYPE := &"btid_oblique_filling"
 const OUT_OF_BOUNDS_TYPE := &"btid_out_of_bounds"
 
 var type_id: StringName:
@@ -75,3 +76,5 @@ class Slot:
 	const CENTER := &"slid_center"
 
 	const OBLIQUE := &"slid_oblique"
+	const OBLIQUE_SIDE_LEFT := &"slid_oblique_side_left"
+	const OBLIQUE_SIDE_RIGHT := &"slid_oblique_side_right"
